@@ -1,10 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, send_file, abort, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file, abort, session
 import os
 import sqlite3
 from datetime import datetime
 import pandas as pd
 import json
-import tempfile
 
 app = Flask(__name__)
 app.secret_key = "super_secret"
@@ -15,9 +14,9 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 DB = "beyond.db"
 
 
-# -------------------------
-# Database helpers
-# -------------------------
+# ---------------------------------------------------------
+# DATABASE CONNECTION & CREATION
+# ---------------------------------------------------------
 def get_db():
     conn = sqlite3.connect(DB)
     conn.row_factory = sqlite3.Row
@@ -86,25 +85,23 @@ def create_tables():
     conn.close()
 
 
-# ensure tables exist
 create_tables()
 
 
-# -------------------------
-# File save utility
-# -------------------------
+# ---------------------------------------------------------
+# FILE SAVING UTILITY
+# ---------------------------------------------------------
 def save_file(file):
-    if not file or not getattr(file, "filename", None):
+    if not file or not file.filename:
         return None
-    fname = datetime.now().strftime("%Y%m%d%H%M%S_") + file.filename
-    path = os.path.join(UPLOAD_FOLDER, fname)
-    file.save(path)
-    return path
+    name = datetime.now().strftime("%Y%m%d%H%M%S_") + file.filename
+    file.save(os.path.join(UPLOAD_FOLDER, name))
+    return f"{UPLOAD_FOLDER}/{name}"
 
 
-# -------------------------
-# Simple auth (passcodes)
-# -------------------------
+# ---------------------------------------------------------
+# AUTHENTICATION
+# ---------------------------------------------------------
 employee_pass = ["1111", "2222", "3333"]
 boss_pass = ["9999", "8888"]
 
@@ -123,21 +120,22 @@ def requires_role(allow_employee=False):
     return decorator
 
 
-# -------------------------
-# Auth routes
-# -------------------------
 @app.route("/", methods=["GET", "POST"])
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        code = request.form.get("passcode", "").strip()
+        code = request.form.get("passcode")
+
         if code in employee_pass:
             session["role"] = "employee"
             return redirect(url_for("index"))
+
         if code in boss_pass:
             session["role"] = "boss"
             return redirect(url_for("index"))
+
         flash("Invalid passcode", "danger")
+
     return render_template("login.html")
 
 
@@ -147,15 +145,18 @@ def logout():
     return redirect(url_for("login"))
 
 
+# ---------------------------------------------------------
+# HOME PAGE
+# ---------------------------------------------------------
 @app.route("/index")
 @requires_role(allow_employee=True)
 def index():
     return render_template("index.html")
 
 
-# -------------------------
-# Leak test route
-# -------------------------
+# ---------------------------------------------------------
+# LEAK TEST FORM
+# ---------------------------------------------------------
 @app.route("/leak", methods=["GET", "POST"])
 @requires_role(allow_employee=True)
 def leak_page():
@@ -171,7 +172,7 @@ def leak_page():
             request.form.get("flavour"),
             request.form.get("grammage"),
             request.form.get("result"),
-            save_file(request.files.get("photo")) if request.files.get("photo") else None,
+            save_file(request.files.get("photo")),
             request.form.get("remarks")
         ))
         conn.commit()
@@ -180,9 +181,9 @@ def leak_page():
     return render_template("form_leak.html")
 
 
-# -------------------------
-# Oxygen test route
-# -------------------------
+# ---------------------------------------------------------
+# OXYGEN FORM
+# ---------------------------------------------------------
 @app.route("/oxygen", methods=["GET", "POST"])
 @requires_role(allow_employee=True)
 def oxygen_page():
@@ -190,11 +191,11 @@ def oxygen_page():
         try:
             temp = float(request.form.get("temperature") or 0)
         except:
-            temp = 0.0
+            temp = 0
         try:
             oxy = float(request.form.get("oxygen") or 0)
         except:
-            oxy = 0.0
+            oxy = 0
 
         conn = get_db()
         conn.execute("""
@@ -208,7 +209,7 @@ def oxygen_page():
             request.form.get("grammage"),
             temp,
             oxy,
-            save_file(request.files.get("photo")) if request.files.get("photo") else None,
+            save_file(request.files.get("photo")),
             request.form.get("remarks")
         ))
         conn.commit()
@@ -217,19 +218,19 @@ def oxygen_page():
     return render_template("form_oxygen.html")
 
 
-# -------------------------
-# Breakage route
-# -------------------------
+# ---------------------------------------------------------
+# BREAKAGE FORM
+# ---------------------------------------------------------
 @app.route("/breakage", methods=["GET", "POST"])
 @requires_role(allow_employee=True)
 def breakage_page():
-    if request.method == "POST":
-        def to_float(v):
-            try:
-                return float(v or 0)
-            except:
-                return 0.0
+    def to_float(x):
+        try:
+            return float(x or 0)
+        except:
+            return 0.0
 
+    if request.method == "POST":
         conn = get_db()
         conn.execute("""
             INSERT INTO breakage
@@ -243,18 +244,18 @@ def breakage_page():
             to_float(request.form.get("broken")),
             to_float(request.form.get("cluster")),
             to_float(request.form.get("residue")),
-            save_file(request.files.get("photo")) if request.files.get("photo") else None,
+            save_file(request.files.get("photo")),
             request.form.get("remarks")
         ))
         conn.commit()
         conn.close()
-        flash("Breakage analysis submitted!", "success")
+        flash("Breakage data submitted!", "success")
     return render_template("form_breakage.html")
 
 
-# -------------------------
-# Production log route
-# -------------------------
+# ---------------------------------------------------------
+# PRODUCTION LOG
+# ---------------------------------------------------------
 @app.route("/log", methods=["GET", "POST"])
 @requires_role(allow_employee=True)
 def log_page():
@@ -274,264 +275,268 @@ def log_page():
         ))
         conn.commit()
         conn.close()
-        flash("Log entry submitted!", "success")
+        flash("Log submitted!", "success")
     return render_template("form_production.html")
 
 
-# -------------------------
-# Dashboard page (renders template)
-# -------------------------
+# ---------------------------------------------------------
+# DASHBOARD PAGE
+# ---------------------------------------------------------
 @app.route("/dashboard")
 @requires_role(allow_employee=False)
 def dashboard():
     return render_template("dashboard.html")
 
 
-# -------------------------
-# Export helpers
-# -------------------------
-def rows_to_temp_xlsx(rows, filename):
-    df = pd.DataFrame([dict(r) for r in rows])
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx")
-    df.to_excel(tmp.name, index=False)
-    return tmp.name
+# ---------------------------------------------------------
+# EXPORT ROUTES (FIXED FOR MOBILE)
+# ---------------------------------------------------------
+def export_excel(filename, df):
+    df.to_excel(filename, index=False)
+    return send_file(
+        filename,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 
 @app.route("/export/leak_tests")
 @requires_role(allow_employee=False)
 def export_leak():
     conn = get_db()
-    rows = conn.execute("SELECT date, line, flavour, grammage, result FROM leak_tests").fetchall()
+    rows = conn.execute("SELECT date,line,flavour,grammage,result FROM leak_tests").fetchall()
     conn.close()
-    tmp = rows_to_temp_xlsx(rows, "leak_tests.xlsx")
-    return send_file(tmp, as_attachment=True, download_name="leak_tests.xlsx")
+    df = pd.DataFrame([dict(r) for r in rows])
+    return export_excel("leak_tests.xlsx", df)
 
 
 @app.route("/export/oxygen_tests")
 @requires_role(allow_employee=False)
-def export_oxygen():
+def export_oxy():
     conn = get_db()
-    rows = conn.execute("SELECT date, line, flavour, grammage, temperature, oxygen FROM oxygen_tests").fetchall()
+    rows = conn.execute(
+        "SELECT date,line,flavour,grammage,temperature,oxygen FROM oxygen_tests"
+    ).fetchall()
     conn.close()
-    tmp = rows_to_temp_xlsx(rows, "oxygen_tests.xlsx")
-    return send_file(tmp, as_attachment=True, download_name="oxygen_tests.xlsx")
+    df = pd.DataFrame([dict(r) for r in rows])
+    return export_excel("oxygen_tests.xlsx", df)
 
 
 @app.route("/export/breakage")
 @requires_role(allow_employee=False)
 def export_breakage():
     conn = get_db()
-    rows = conn.execute("SELECT date, line, product_code, good, broken, cluster, residue FROM breakage").fetchall()
+    rows = conn.execute(
+        "SELECT date,line,product_code,good,broken,cluster,residue FROM breakage"
+    ).fetchall()
     conn.close()
-    tmp = rows_to_temp_xlsx(rows, "breakage.xlsx")
-    return send_file(tmp, as_attachment=True, download_name="breakage.xlsx")
+    df = pd.DataFrame([dict(r) for r in rows])
+    return export_excel("breakage.xlsx", df)
 
 
 @app.route("/export/production_log")
 @requires_role(allow_employee=False)
-def export_production_log():
+def export_prod():
     conn = get_db()
-    rows = conn.execute("SELECT date, time, line, action, stop_reason, stop_other FROM production_log").fetchall()
+    rows = conn.execute(
+        "SELECT date,time,line,action,stop_reason,stop_other FROM production_log"
+    ).fetchall()
     conn.close()
 
     cleaned = []
     for r in rows:
-        reason = r["stop_other"] if r["stop_reason"] == "Other" else r["stop_reason"]
         cleaned.append({
             "Date": r["date"],
             "Time": r["time"],
             "Line": r["line"],
             "Action": r["action"],
-            "Stop Reason": reason
+            "Stop Reason":
+                r["stop_other"] if r["stop_reason"] == "Other" else r["stop_reason"]
         })
 
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx")
-    pd.DataFrame(cleaned).to_excel(tmp.name, index=False)
-    return send_file(tmp.name, as_attachment=True, download_name="production_log.xlsx")
+    df = pd.DataFrame(cleaned)
+    return export_excel("production_log.xlsx", df)
 
 
-# -------------------------
-# Advanced Dashboard API (multi-select filters)
-# -------------------------
+# ---------------------------------------------------------
+# ADVANCED DASHBOARD API (JSON FIXED)
+# ---------------------------------------------------------
 @app.route("/api/dashboard_data_v2", methods=["POST"])
 @requires_role(allow_employee=False)
 def dashboard_data_v2():
+
     filters = request.get_json() or {}
 
     fromDate = filters.get("fromDate")
     toDate = filters.get("toDate")
-    # Expect lists from frontend for these three fields (multi-select)
-    lines = filters.get("line") or []        # list or empty
-    flavours = filters.get("flavour") or [] # list or empty
-    grammages = filters.get("grammage") or [] # list or empty
-    product_code = filters.get("product_code") or None
+    line = filters.get("line") or []
+    flavour = filters.get("flavour") or []
+    grammage = filters.get("grammage") or []
+    product_code = filters.get("product_code")
 
     conn = get_db()
 
-    # helper to add date filters
-    def apply_date_filters(q, params, field="date"):
-        if fromDate:
-            q += f" AND {field} >= ?"
-            params.append(fromDate)
-        if toDate:
-            q += f" AND {field} <= ?"
-            params.append(toDate)
-        return q, params
+    # Helper: Add IN clause
+    def add_in(q, p, field, values):
+        if values:
+            q += f" AND {field} IN ({','.join(['?'] * len(values))})"
+            p.extend(values)
+        return q, p
 
-    # helper to add IN clause
-    def add_in_clause(q, params, field, values):
-        if values and len(values) > 0:
-            placeholders = ",".join(["?"] * len(values))
-            q += f" AND {field} IN ({placeholders})"
-            params.extend(values)
-        return q, params
+    # ---------------- LEAK TEST ----------------
+    q = "SELECT date,result,line,flavour,grammage FROM leak_tests WHERE 1=1"
+    p = []
+    if fromDate:
+        q += " AND date >= ?"; p.append(fromDate)
+    if toDate:
+        q += " AND date <= ?"; p.append(toDate)
 
-    # ---------------------------
-    # LEAK TESTS
-    # ---------------------------
-    leak_q = "SELECT date, result, flavour, grammage, line FROM leak_tests WHERE 1=1"
-    leak_p = []
-    leak_q, leak_p = apply_date_filters(leak_q, leak_p, "date")
-    leak_q, leak_p = add_in_clause(leak_q, leak_p, "line", lines)
-    leak_q, leak_p = add_in_clause(leak_q, leak_p, "flavour", flavours)
-    leak_q, leak_p = add_in_clause(leak_q, leak_p, "grammage", grammages)
+    q, p = add_in(q, p, "line", line)
+    q, p = add_in(q, p, "flavour", flavour)
+    q, p = add_in(q, p, "grammage", grammage)
 
-    leak_rows = conn.execute(leak_q, leak_p).fetchall()
+    leak_rows = conn.execute(q, p).fetchall()
 
     leak_group = {}
     for r in leak_rows:
         d = r["date"]
         leak_group.setdefault(d, {"Pass": 0, "Fail": 0})
-        key = r["result"] if r["result"] in ("Pass", "Fail") else "Fail"
-        leak_group[d][key] += 1
+        leak_group[d][r["result"]] += 1
 
-    leak_dates = sorted(leak_group.keys())
-    leak_pass = [leak_group[d]["Pass"] for d in leak_dates]
-    leak_fail = [leak_group[d]["Fail"] for d in leak_dates]
-    total_tests = sum(leak_pass) + sum(leak_fail)
-    pass_rate = round((sum(leak_pass) / total_tests) * 100, 2) if total_tests else 0
+    leak_data = {"date": [], "pass": [], "fail": []}
+    for d in sorted(leak_group.keys()):
+        leak_data["date"].append(d)
+        leak_data["pass"].append(leak_group[d]["Pass"])
+        leak_data["fail"].append(leak_group[d]["Fail"])
 
-    # ---------------------------
-    # OXYGEN TESTS
-    # ---------------------------
-    oxy_q = "SELECT date, oxygen, flavour, grammage, line FROM oxygen_tests WHERE 1=1"
-    oxy_p = []
-    oxy_q, oxy_p = apply_date_filters(oxy_q, oxy_p, "date")
-    oxy_q, oxy_p = add_in_clause(oxy_q, oxy_p, "line", lines)
-    oxy_q, oxy_p = add_in_clause(oxy_q, oxy_p, "flavour", flavours)
-    oxy_q, oxy_p = add_in_clause(oxy_q, oxy_p, "grammage", grammages)
+    total_tests = sum(v["Pass"] + v["Fail"] for v in leak_group.values())
+    pass_rate = round(sum(v["Pass"] for v in leak_group.values()) / total_tests * 100, 2) if total_tests else 0
 
-    oxy_rows = conn.execute(oxy_q, oxy_p).fetchall()
-    oxy_dates = [r["date"] for r in oxy_rows]
-    oxy_values = [r["oxygen"] for r in oxy_rows if r["oxygen"] is not None]
-    avg_oxygen = round(sum(oxy_values) / len(oxy_values), 2) if oxy_values else "-"
+    # ---------------- OXYGEN ----------------
+    q = "SELECT date,oxygen,line,flavour,grammage FROM oxygen_tests WHERE 1=1"
+    p = []
+    if fromDate:
+        q += " AND date >= ?"; p.append(fromDate)
+    if toDate:
+        q += " AND date <= ?"; p.append(toDate)
+    q, p = add_in(q, p, "line", line)
+    q, p = add_in(q, p, "flavour", flavour)
+    q, p = add_in(q, p, "grammage", grammage)
 
-    # ---------------------------
-    # BREAKAGE
-    # ---------------------------
-    break_q = "SELECT date, product_code, good, broken, cluster, residue, line FROM breakage WHERE 1=1"
-    break_p = []
-    break_q, break_p = apply_date_filters(break_q, break_p, "date")
-    break_q, break_p = add_in_clause(break_q, break_p, "line", lines)
-    # breakage table does not have flavour/grammage columns in your schema,
-    # so we don't filter by them here. We support product_code filter:
+    oxy_rows = conn.execute(q, p).fetchall()
+
+    oxy_data = {
+        "date": [r["date"] for r in oxy_rows],
+        "oxygen": [r["oxygen"] for r in oxy_rows]
+    }
+    avg_oxygen = round(sum(r["oxygen"] for r in oxy_rows) / len(oxy_rows), 2) if oxy_rows else "-"
+
+    # ---------------- BREAKAGE ----------------
+    q = "SELECT date,product_code,good,broken,cluster,residue,line FROM breakage WHERE 1=1"
+    p = []
+    if fromDate:
+        q += " AND date >= ?"; p.append(fromDate)
+    if toDate:
+        q += " AND date <= ?"; p.append(toDate)
     if product_code:
-        break_q += " AND product_code LIKE ?"; break_p.append(f"%{product_code}%")
+        q += " AND product_code = ?"; p.append(product_code)
 
-    break_rows = conn.execute(break_q, break_p).fetchall()
-    break_codes = [r["product_code"] for r in break_rows]
-    good_list = [r["good"] for r in break_rows]
-    broken_list = [r["broken"] for r in break_rows]
-    cluster_list = [r["cluster"] for r in break_rows]
-    residue_list = [r["residue"] for r in break_rows]
-    avg_breakage = round(sum(broken_list) / len(broken_list), 2) if broken_list else "-"
+    break_rows = conn.execute(q, p).fetchall()
 
-    # ---------------------------
-    # STOP REASONS
-    # ---------------------------
-    stop_q = "SELECT stop_reason, stop_other, line, date FROM production_log WHERE action='Stop' "
-    stop_p = []
-    stop_q, stop_p = apply_date_filters(stop_q, stop_p, "date")
-    stop_q, stop_p = add_in_clause(stop_q, stop_p, "line", lines)
+    break_data = {
+        "code": [r["product_code"] for r in break_rows],
+        "good": [r["good"] for r in break_rows],
+        "broken": [r["broken"] for r in break_rows],
+        "cluster": [r["cluster"] for r in break_rows],
+        "residue": [r["residue"] for r in break_rows]
+    }
+    avg_break = round(sum(r["broken"] for r in break_rows) / len(break_rows), 2) if break_rows else "-"
 
-    stop_rows = conn.execute(stop_q, stop_p).fetchall()
+    # ---------------- STOP REASONS ----------------
+    q = "SELECT stop_reason, stop_other FROM production_log WHERE action='Stop'"
+    p = []
+    if fromDate:
+        q += " AND date >= ?"; p.append(fromDate)
+    if toDate:
+        q += " AND date <= ?"; p.append(toDate)
+
+    stop_rows = conn.execute(q, p).fetchall()
+
     stop_count = {}
     for r in stop_rows:
         reason = r["stop_other"] if r["stop_reason"] == "Other" else r["stop_reason"]
-        if reason:
-            stop_count[reason] = stop_count.get(reason, 0) + 1
+        stop_count[reason] = stop_count.get(reason, 0) + 1
 
     stop_labels = list(stop_count.keys())
     stop_values = list(stop_count.values())
+
     top_stop = stop_labels[stop_values.index(max(stop_values))] if stop_values else "-"
 
-    # ---------------------------
-    # RAW rows (for export)
-    # ---------------------------
+    # RAW DATA (for filtered export)
     raw = {
         "leak": [dict(r) for r in leak_rows],
         "oxygen": [dict(r) for r in oxy_rows],
         "breakage": [dict(r) for r in break_rows],
-        "stop": [{"reason": (r["stop_other"] if r["stop_reason"] == "Other" else r["stop_reason"])} for r in stop_rows]
+        "stop": [{"reason": r["stop_other"] if r["stop_reason"] == "Other" else r["stop_reason"]} for r in stop_rows]
     }
 
     conn.close()
 
-    result = {
+    return {
         "kpi": {
             "pass_rate": pass_rate,
             "avg_oxygen": avg_oxygen,
-            "avg_breakage": avg_breakage,
+            "avg_breakage": avg_break,
             "top_stop": top_stop
         },
-        "leak": {"date": leak_dates, "pass": leak_pass, "fail": leak_fail},
-        "oxygen": {"date": oxy_dates, "oxygen": oxy_values},
-        "breakage": {"code": break_codes, "good": good_list, "broken": broken_list, "cluster": cluster_list, "residue": residue_list},
+        "leak": leak_data,
+        "oxygen": oxy_data,
+        "breakage": break_data,
         "stop": {"label": stop_labels, "count": stop_values},
         "raw": raw
     }
 
-    return jsonify(result)
 
-
-# -------------------------
-# Export filtered dashboard (combined workbook)
-# -------------------------
+# ---------------------------------------------------------
+# FILTERED COMPLETE EXPORT (MULTI-SHEET EXCEL)
+# ---------------------------------------------------------
 @app.route("/export/dashboard_filtered")
 @requires_role(allow_employee=False)
 def export_dashboard_filtered():
     data_json = request.args.get("data")
     if not data_json:
-        return "No data supplied", 400
+        return "Missing data", 400
+
     try:
         data = json.loads(data_json)
-    except Exception as e:
-        return f"Invalid data: {e}", 400
+    except:
+        return "Invalid JSON", 400
 
-    leak_df = pd.DataFrame(data.get("raw", {}).get("leak", []))
-    oxy_df = pd.DataFrame(data.get("raw", {}).get("oxygen", []))
-    break_df = pd.DataFrame(data.get("raw", {}).get("breakage", []))
-    stop_df = pd.DataFrame(data.get("raw", {}).get("stop", []))
+    filename = "Filtered_Dashboard.xlsx"
 
-    # drop private columns if present
-    for df in (leak_df, oxy_df, break_df):
-        for c in ["id", "photo", "remarks"]:
-            if c in df.columns:
-                df.drop(columns=[c], inplace=True, errors="ignore")
+    leak_df = pd.DataFrame(data["raw"]["leak"])
+    oxy_df = pd.DataFrame(data["raw"]["oxygen"])
+    brk_df = pd.DataFrame(data["raw"]["breakage"])
+    stop_df = pd.DataFrame(data["raw"]["stop"])
 
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx")
-    with pd.ExcelWriter(tmp.name) as writer:
-        # ensure each sheet exists even if empty
-        (leak_df if not leak_df.empty else pd.DataFrame()).to_excel(writer, sheet_name="Leak Tests", index=False)
-        (oxy_df if not oxy_df.empty else pd.DataFrame()).to_excel(writer, sheet_name="Oxygen Tests", index=False)
-        (break_df if not break_df.empty else pd.DataFrame()).to_excel(writer, sheet_name="Breakage", index=False)
-        (stop_df if not stop_df.empty else pd.DataFrame()).to_excel(writer, sheet_name="Stop Reasons", index=False)
+    with pd.ExcelWriter(filename) as writer:
+        leak_df.to_excel(writer, sheet_name="Leak Tests", index=False)
+        oxy_df.to_excel(writer, sheet_name="Oxygen Tests", index=False)
+        brk_df.to_excel(writer, sheet_name="Breakage", index=False)
+        stop_df.to_excel(writer, sheet_name="Stop Reasons", index=False)
 
-    return send_file(tmp.name, as_attachment=True, download_name="Filtered_Dashboard.xlsx")
+    return send_file(
+        filename,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
 
-# -------------------------
-# Run server
-# -------------------------
+# ---------------------------------------------------------
+# RUN SERVER
+# ---------------------------------------------------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="0.0.0.0", debug=True, port=8080)
+
