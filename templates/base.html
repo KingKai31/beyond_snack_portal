@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Beyond Snack Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<nav class="navbar has-shadow is-white">
+  <div class="navbar-brand" style="display:flex;align-items:center;padding-left:15px;">
+    <a class="navbar-item" href="{{ url_for('index') }}">
+      <img src="{{ url_for('static', filename='logo.png') }}" style="height:48px;margin-right:10px;">
+    </a>
+    <span class="navbar-item"><strong>Beyond Snack Portal</strong></span>
+  </div>
+
+  <div class="navbar-end" style="padding-right:20px;">
+    {% if session.get('role') %}
+      <div class="navbar-item"><a class="button is-light" href="{{ url_for('logout') }}">Logout</a></div>
+    {% endif %}
+  </div>
+</nav>
+
+<section class="section">
+  <div class="container">
+
+    {% if request.path != '/index' and request.path != '/login' %}
+    <div style="margin-bottom: 15px;">
+      <button class="button is-light" onclick="history.back()">← Back</button>
+    </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+  </div>
+</section>
+
+</body>
+</html>

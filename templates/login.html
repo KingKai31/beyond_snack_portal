@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="title">Login</h1>
+<p>Enter your passcode to access the Beyond Snack portal.</p>
+
+<form method="post">
+  <div class="field">
+    <label class="label">Passcode</label>
+    <input class="input" name="passcode" required>
+  </div>
+
+  <button class="button is-link is-fullwidth">Login</button>
+</form>
+
+{% endblock %}

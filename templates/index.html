@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .menu-card {
+        background: #ffffff;
+        padding: 22px;
+        border-radius: 14px;
+        margin-bottom: 28px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+    .menu-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 14px;
+    }
+    .menu-btn {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 16px;
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+        border-radius: 10px;
+        transition: 0.15s ease;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .menu-btn:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .menu-icon {
+        font-size: 1.4rem;
+        opacity: 0.8;
+    }
+</style>
+
+<h1 class="title">Beyond Snack — Home</h1>
+
+<p class="subtitle">
+    Welcome to the internal production portal.
+    {% if session.get('role') == 'boss' %}
+    <strong>You have full admin access.</strong>
+    {% else %}
+    <strong>You have employee access.</strong>
+    {% endif %}
+</p>
+
+
+<!-- EMPLOYEE + BOSS SECTION -->
+<div class="menu-card">
+    <div class="menu-title">Production Forms</div>
+
+    <a href="{{ url_for('leak_page') }}" 
+       class="button is-primary is-light menu-btn">
+        <span class="menu-icon">🧪</span> Leak Test
+    </a>
+
+    <a href="{{ url_for('oxygen_page') }}" 
+       class="button is-primary is-light menu-btn">
+        <span class="menu-icon">🌬️</span> Oxygen Test
+    </a>
+
+    <a href="{{ url_for('breakage_page') }}" 
+       class="button is-primary is-light menu-btn">
+        <span class="menu-icon">🍟</span> Breakage Analysis
+    </a>
+
+    <a href="{{ url_for('log_page') }}" 
+       class="button is-primary is-light menu-btn">
+        <span class="menu-icon">📋</span> Log Entry
+    </a>
+</div>
+
+
+<!-- BOSS EXCLUSIVE SECTION -->
+{% if session.get('role') == 'boss' %}
+<div class="menu-card">
+    <div class="menu-title">Management & Analytics</div>
+
+    <a href="{{ url_for('dashboard') }}" 
+       class="button is-link menu-btn">
+        <span class="menu-icon">📊</span> Advanced Dashboard
+    </a>
+
+    <div class="menu-title" style="margin-top:20px;">Download Excel Reports</div>
+
+    <a href="{{ url_for('export_leak') }}" 
+       class="button is-info is-light menu-btn">
+        <span class="menu-icon">📥</span> Leak Tests Report
+    </a>
+
+    <a href="{{ url_for('export_oxygen') }}" 
+       class="button is-info is-light menu-btn">
+        <span class="menu-icon">📥</span> Oxygen Tests Report
+    </a>
+
+    <a href="{{ url_for('export_breakage') }}" 
+       class="button is-info is-light menu-btn">
+        <span class="menu-icon">📥</span> Breakage Report
+    </a>
+
+    <a href="{{ url_for('export_production_log') }}" 
+       class="button is-info is-light menu-btn">
+        <span class="menu-icon">📥</span> Production Log Report
+    </a>
+</div>
+{% endif %}
+
+{% endblock %}

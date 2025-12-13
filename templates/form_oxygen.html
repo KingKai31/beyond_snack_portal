@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  .form-card { background:#fff; padding:28px; border-radius:18px; box-shadow:0 8px 24px rgba(0,0,0,0.08); }
+  .button-active { background:#3273dc !important; color:#fff !important; }
+</style>
+
+<div class="form-card">
+  <h1 class="title is-4">🌬️ Oxygen Test Entry</h1>
+
+  <form method="post" enctype="multipart/form-data">
+
+    <!-- LINE -->
+    <div class="field">
+      <label class="label">Select Line</label>
+      <div style="display:flex; gap:10px;">
+        <button type="button" class="button lineBtn" data-line="Line 1">Line 1</button>
+        <button type="button" class="button lineBtn" data-line="Line 2">Line 2</button>
+      </div>
+      <input type="hidden" name="line" id="lineInput">
+    </div>
+
+    <!-- FLAVOUR -->
+    <div class="field">
+      <label class="label">Flavour</label>
+      <div class="select is-fullwidth">
+        <select id="flavourSelect" name="flavour" required>
+          <option value="">Select</option>
+          <option>OS</option><option>PP</option><option>CO</option><option>SP</option>
+          <option>DM</option><option>HS</option><option>SC</option><option>MB</option>
+          <option>DP</option><option>RS</option><option>TO</option><option>SN</option>
+          <option>PU</option><option>AC</option><option>MA</option><option>Combo Pack</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- GRAMMAGE -->
+    <div class="field">
+      <label class="label">Grammage</label>
+      <div class="select is-fullwidth">
+        <select id="grammageSelect" name="grammage" required>
+          <option value="">Select</option>
+          <option>10</option><option>15</option><option>26</option><option>48</option>
+          <option>75</option><option>85</option><option>89</option><option>100</option>
+          <option>125</option><option>150</option><option>250</option><option>300</option>
+          <option>400</option><option>450</option><option>600</option><option>50</option>
+          <option>235</option><option>120</option><option>25</option><option>80</option>
+          <option>70</option><option>320</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- TEMPERATURE -->
+    <div class="field">
+      <label class="label">Temperature (°C)</label>
+      <input class="input"
+        id="temp"
+        name="temperature"
+        required
+        inputmode="decimal"
+        pattern="[0-9]*\.?[0-9]*"
+        autocomplete="off"
+        onbeforeinput="if(event.data && !event.data.match(/^[0-9.]$/)) event.preventDefault();"
+        onkeypress="return /[0-9.]/.test(event.key);"
+        onpaste="return false;"
+        oninput="this.value=this.value.replace(/[^0-9.]/g,'');">
+    </div>
+
+    <!-- OXYGEN -->
+    <div class="field">
+      <label class="label">Oxygen %</label>
+      <input class="input"
+        id="oxy"
+        name="oxygen"
+        required
+        inputmode="decimal"
+        pattern="[0-9]*\.?[0-9]*"
+        autocomplete="off"
+        onbeforeinput="if(event.data && !event.data.match(/^[0-9.]$/)) event.preventDefault();"
+        onkeypress="return /[0-9.]/.test(event.key);"
+        onpaste="return false;"
+        oninput="this.value=this.value.replace(/[^0-9.]/g,'');">
+    </div>
+
+    <button id="submitBtn" class="button is-link is-fullwidth" disabled>Submit</button>
+
+  </form>
+</div>
+
+<script>
+function enable() {
+  const ok =
+    document.getElementById("lineInput").value &&
+    document.getElementById("flavourSelect").value &&
+    document.getElementById("grammageSelect").value &&
+    document.getElementById("temp").value &&
+    document.getElementById("oxy").value;
+
+  document.getElementById("submitBtn").disabled = !ok;
+}
+
+["flavourSelect","grammageSelect","temp","oxy"].forEach(id=>{
+  document.getElementById(id).oninput = enable;
+});
+
+document.querySelectorAll(".lineBtn").forEach(btn=>{
+  btn.onclick = ()=>{
+    document.getElementById("lineInput").value = btn.dataset.line;
+    document.querySelectorAll(".lineBtn").forEach(x=>x.classList.remove("button-active"));
+    btn.classList.add("button-active");
+    enable();
+  };
+});
+</script>
+
+{% endblock %}
+<button class="button is-light" onclick="history.back()" style="margin-bottom:15px;">
+  ← Back
+</button>

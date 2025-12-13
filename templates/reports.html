@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="title">Reports & Downloads</h1>
+
+<div class="box">
+  <a class="button is-link is-fullwidth" href="{{ url_for('export_leak') }}">Download Leak Test Data</a><br>
+  <a class="button is-link is-fullwidth" href="{{ url_for('export_oxygen') }}">Download Oxygen Test Data</a><br>
+  <a class="button is-link is-fullwidth" href="{{ url_for('export_breakage') }}">Download Breakage Data</a><br>
+  <a class="button is-link is-fullwidth" href="{{ url_for('export_log') }}">Download Production Log</a><br>
+</div>
+
+{% endblock %}

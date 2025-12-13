@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  .form-card { background:#fff; padding:28px; border-radius:18px; box-shadow:0 8px 24px rgba(0,0,0,0.08); }
+  .button-active { background:#3273dc !important; color:#fff !important; }
+  .section-title { font-size:1.5rem; font-weight:700; margin-bottom:18px; }
+</style>
+
+<div class="form-card">
+  <h1 class="section-title">🧪 Leak Test Entry</h1>
+
+  <form method="post" enctype="multipart/form-data">
+
+    <!-- LINE -->
+    <div class="field">
+      <label class="label">Select Line</label>
+      <div style="display:flex; gap:10px;">
+        <button type="button" class="button lineBtn" data-line="Line 1">Line 1</button>
+        <button type="button" class="button lineBtn" data-line="Line 2">Line 2</button>
+      </div>
+      <input type="hidden" name="line" id="lineInput">
+    </div>
+
+    <!-- FLAVOUR -->
+    <div class="field">
+      <label class="label">Flavour</label>
+      <div class="select is-fullwidth">
+        <select name="flavour" id="flavourSelect" required>
+          <option value="">Select flavour</option>
+          <option>OS</option><option>PP</option><option>CO</option><option>SP</option>
+          <option>DM</option><option>HS</option><option>SC</option><option>MB</option>
+          <option>DP</option><option>RS</option><option>TO</option><option>SN</option>
+          <option>PU</option><option>AC</option><option>MA</option><option>Combo Pack</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- GRAMMAGE -->
+    <div class="field">
+      <label class="label">Grammage (g)</label>
+      <div class="select is-fullwidth">
+        <select id="grammageSelect" name="grammage" required>
+          <option value="">Select grammage</option>
+          <option>10</option><option>15</option><option>26</option><option>48</option>
+          <option>75</option><option>85</option><option>89</option><option>100</option>
+          <option>125</option><option>150</option><option>250</option><option>300</option>
+          <option>400</option><option>450</option><option>600</option><option>50</option>
+          <option>235</option><option>120</option><option>25</option><option>80</option>
+          <option>70</option><option>320</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="field">
+      <label class="label">Result</label>
+      <div style="display:flex; gap:10px;">
+        <button type="button" class="button resultBtn is-success" data-result="Pass">Pass</button>
+        <button type="button" class="button resultBtn is-danger" data-result="Fail">Fail</button>
+      </div>
+      <input type="hidden" name="result" id="resultInput">
+    </div>
+
+    <!-- OPTIONAL -->
+    <div class="field">
+      <label class="label">Photo (optional)</label>
+      <input type="file" class="input" name="photo" accept="image/*">
+    </div>
+
+    <div class="field">
+      <label class="label">Remarks (optional)</label>
+      <input class="input" name="remarks">
+    </div>
+
+    <button id="submitBtn" class="button is-link is-fullwidth" disabled>Submit</button>
+
+  </form>
+</div>
+
+<script>
+function enable() {
+  const ok =
+    document.getElementById("lineInput").value &&
+    document.getElementById("flavourSelect").value &&
+    document.getElementById("grammageSelect").value &&
+    document.getElementById("resultInput").value;
+
+  document.getElementById("submitBtn").disabled = !ok;
+}
+
+document.querySelectorAll(".lineBtn").forEach(btn=>{
+  btn.onclick = ()=>{
+    document.getElementById("lineInput").value = btn.dataset.line;
+    document.querySelectorAll(".lineBtn").forEach(x=>x.classList.remove("button-active"));
+    btn.classList.add("button-active");
+    enable();
+  };
+});
+
+document.querySelectorAll(".resultBtn").forEach(btn=>{
+  btn.onclick = ()=>{
+    document.getElementById("resultInput").value = btn.dataset.result;
+    document.querySelectorAll(".resultBtn").forEach(x=>x.classList.remove("button-active"));
+    btn.classList.add("button-active");
+    enable();
+  };
+});
+
+["flavourSelect","grammageSelect"].forEach(id=>{
+  document.getElementById(id).onchange = enable;
+});
+</script>
+
+{% endblock %}
+
+<button class="button is-light" onclick="history.back()" style="margin-bottom:15px;">
+  ← Back
+</button>

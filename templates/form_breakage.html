@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  .form-card { 
+    background:#fff; 
+    padding:28px; 
+    border-radius:18px; 
+    box-shadow:0 8px 24px rgba(0,0,0,0.08); 
+  }
+  .button-active { 
+    background:#3273dc !important; 
+    color:#fff !important; 
+  }
+</style>
+
+<div class="form-card">
+  <h1 class="title is-4">🍟 Breakage Analysis</h1>
+
+  <form method="post">
+
+    <!-- LINE -->
+    <div class="field">
+      <label class="label">Select Line</label>
+      <div style="display:flex; gap:10px;">
+        <button type="button" class="button lineBtn" data-line="Line 1">Line 1</button>
+        <button type="button" class="button lineBtn" data-line="Line 2">Line 2</button>
+      </div>
+      <input type="hidden" id="lineInput" name="line">
+    </div>
+
+    <!-- PRODUCT CODE -->
+    <div class="field">
+      <label class="label">Product Code</label>
+      <div class="select is-fullwidth">
+        <select id="productSelect" name="product_code" required>
+          <option value="">Select</option>
+
+          <option>OS10G</option>
+          <option>PP10G</option>
+          <option>CO10G</option>
+          <option>SP10G</option>
+          <option>DM10G</option>
+          <option>HS10G</option>
+
+          <option>OS26G</option>
+          <option>PP26G</option>
+          <option>DM26G</option>
+          <option>HS26G</option>
+
+          <option>OS75G</option>
+          <option>PP75G</option>
+          <option>DM75G</option>
+          <option>HS75G</option>
+
+          <option>OS150G</option>
+          <option>PP150G</option>
+          <option>DM150G</option>
+          <option>HS150G</option>
+
+        </select>
+      </div>
+    </div>
+
+    <!-- NUMERIC FIELDS -->
+    <div class="field">
+      <label class="label">Good Chips %</label>
+      <input class="input"
+        id="good"
+        name="good"
+        required
+        inputmode="decimal"
+        pattern="[0-9]*\.?[0-9]*"
+        autocomplete="off"
+        onbeforeinput="if(event.data && !event.data.match(/^[0-9.]$/)) event.preventDefault();"
+        onkeypress="return /[0-9.]/.test(event.key);"
+        onpaste="return false;"
+        oninput="this.value=this.value.replace(/[^0-9.]/g,'');">
+    </div>
+
+    <div class="field">
+      <label class="label">Broken Chips %</label>
+      <input class="input"
+        id="broken"
+        name="broken"
+        required
+        inputmode="decimal"
+        pattern="[0-9]*\.?[0-9]*"
+        autocomplete="off"
+        onbeforeinput="if(event.data && !event.data.match(/^[0-9.]$/)) event.preventDefault();"
+        onkeypress="return /[0-9.]/.test(event.key);"
+        onpaste="return false;"
+        oninput="this.value=this.value.replace(/[^0-9.]/g,'');">
+    </div>
+
+    <div class="field">
+      <label class="label">Cluster %</label>
+      <input class="input"
+        id="cluster"
+        name="cluster"
+        required
+        inputmode="decimal"
+        pattern="[0-9]*\.?[0-9]*"
+        autocomplete="off"
+        onbeforeinput="if(event.data && !event.data.match(/^[0-9.]$/)) event.preventDefault();"
+        onkeypress="return /[0-9.]/.test(event.key);"
+        onpaste="return false;"
+        oninput="this.value=this.value.replace(/[^0-9.]/g,'');">
+    </div>
+
+    <div class="field">
+      <label class="label">Residue %</label>
+      <input class="input"
+        id="residue"
+        name="residue"
+        required
+        inputmode="decimal"
+        pattern="[0-9]*\.?[0-9]*"
+        autocomplete="off"
+        onbeforeinput="if(event.data && !event.data.match(/^[0-9.]$/)) event.preventDefault();"
+        onkeypress="return /[0-9.]/.test(event.key);"
+        onpaste="return false;"
+        oninput="this.value=this.value.replace(/[^0-9.]/g,'');">
+    </div>
+
+    <button id="submitBtn" class="button is-link is-fullwidth" disabled>Submit Breakage</button>
+
+  </form>
+</div>
+
+<script>
+function enable() {
+  const ok =
+    document.getElementById("lineInput").value &&
+    document.getElementById("productSelect").value &&
+    document.getElementById("good").value &&
+    document.getElementById("broken").value &&
+    document.getElementById("cluster").value &&
+    document.getElementById("residue").value;
+
+  document.getElementById("submitBtn").disabled = !ok;
+}
+
+["productSelect","good","broken","cluster","residue"].forEach(id=>{
+  document.getElementById(id).oninput = enable;
+});
+
+document.querySelectorAll(".lineBtn").forEach(btn=>{
+  btn.onclick = ()=>{
+    document.getElementById("lineInput").value = btn.dataset.line;
+    document.querySelectorAll('.lineBtn').forEach(x=>x.classList.remove("button-active"));
+    btn.classList.add("button-active");
+    enable();
+  };
+});
+</script>
+
+{% endblock %}
+
+<button class="button is-light" onclick="history.back()" style="margin-bottom:15px;">
+  ← Back
+</button>

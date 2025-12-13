@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  .filter-box {
+    background: #fff;
+    padding: 18px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  }
+
+  .line-buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .line-btn {
+    padding: 10px 18px;
+    border: 2px solid #00b894;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+  }
+
+  .line-btn.active {
+    background: #00b894;
+    color: white;
+  }
+
+  .chart-card {
+    background: #fff;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  }
+
+</style>
+
+
+<h1 class="title">Advanced Analytics Dashboard V2</h1>
+
+<button class="button is-light" onclick="toggleFilters()">Toggle Filters</button>
+
+<div id="filterPanel" class="filter-box" style="display:none;">
+
+  <div class="columns is-multiline">
+
+    <!-- Date From -->
+    <div class="column is-3">
+      <label class="label">From Date</label>
+      <input id="fromDate" type="date" class="input">
+    </div>
+
+    <!-- Date To -->
+    <div class="column is-3">
+      <label class="label">To Date</label>
+      <input id="toDate" type="date" class="input">
+    </div>
+
+    <!-- Line Buttons -->
+    <div class="column is-6">
+      <label class="label">Line</label>
+      <div class="line-buttons">
+        <button class="line-btn" onclick="selectLine('Line 1')" id="btnLine1">Line 1</button>
+        <button class="line-btn" onclick="selectLine('Line 2')" id="btnLine2">Line 2</button>
+      </div>
+    </div>
+
+    <!-- Flavour -->
+    <div class="column is-4">
+      <label class="label">Flavour</label>
+      <div class="select is-fullwidth">
+        <select id="filterFlavour">
+          <option value="">All</option>
+          <option>OS</option><option>PP</option><option>CO</option><option>SP</option>
+          <option>DM</option><option>HS</option><option>SC</option><option>MB</option>
+          <option>DP</option><option>RS</option><option>TO</option><option>SN</option>
+          <option>PU</option><option>AC</option><option>MA</option><option>Combo Pack</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Grammage -->
+    <div class="column is-4">
+      <label class="label">Grammage</label>
+      <div class="select is-fullwidth">
+        <select id="filterGrammage">
+          <option value="">All</option>
+          <option>10</option><option>15</option><option>26</option><option>48</option>
+          <option>75</option><option>85</option><option>89</option><option>100</option>
+          <option>125</option><option>150</option><option>250</option><option>300</option>
+          <option>400</option><option>450</option><option>600</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Product Code -->
+    <div class="column is-4">
+      <label class="label">Product Code</label>
+      <div class="select is-fullwidth">
+        <select id="filterProduct">
+          <option value="">All</option>
+          <option>OS10G</option><option>PP10G</option><option>CO10G</option>
+          <option>OS26G</option><option>PP26G</option> <!-- Add full list later -->
+        </select>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="column is-12" style="margin-top:15px;">
+      <button class="button is-primary" onclick="loadDashboard()">Apply</button>
+      <button class="button is-light" onclick="resetFilters()">Reset</button>
+      <button class="button is-success" onclick="exportFiltered()">Export Excel</button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- KPI Cards -->
+<div class="columns">
+  <div class="column">
+    <div class="chart-card">
+      <h3 class="title is-6">Pass %</h3>
+      <h1 id="kpiPass">0%</h1>
+    </div>
+  </div>
+
+  <div class="column">
+    <div class="chart-card">
+      <h3 class="title is-6">Avg Oxygen %</h3>
+      <h1 id="kpiOxy">-</h1>
+    </div>
+  </div>
+
+  <div class="column">
+    <div class="chart-card">
+      <h3 class="title is-6">Avg Breakage %</h3>
+      <h1 id="kpiBreak">-</h1>
+    </div>
+  </div>
+
+  <div class="column">
+    <div class="chart-card">
+      <h3 class="title is-6">Top Stop Reason</h3>
+      <h1 id="kpiStop">-</h1>
+    </div>
+  </div>
+</div>
+
+<!-- CHARTS -->
+<div class="chart-card">
+  <h3 class="title is-5">Leak Test — Pass/Fail</h3>
+  <canvas id="leakChart"></canvas>
+</div>
+
+<div class="chart-card">
+  <h3 class="title is-5">Oxygen Trend</h3>
+  <canvas id="oxyChart"></canvas>
+</div>
+
+<div class="chart-card">
+  <h3 class="title is-5">Breakage Analysis</h3>
+  <canvas id="breakChart"></canvas>
+</div>
+
+<div class="chart-card">
+  <h3 class="title is-5">Stop Reasons</h3>
+  <canvas id="stopChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+let selectedLine = "";
+
+function toggleFilters(){
+    const p = document.getElementById("filterPanel");
+    p.style.display = p.style.display === "none" ? "block" : "none";
+}
+
+function selectLine(line){
+    selectedLine = line;
+
+    document.getElementById("btnLine1").classList.remove("active");
+    document.getElementById("btnLine2").classList.remove("active");
+
+    if(line === "Line 1") document.getElementById("btnLine1").classList.add("active");
+    if(line === "Line 2") document.getElementById("btnLine2").classList.add("active");
+}
+
+function resetFilters(){
+    document.getElementById("fromDate").value = "";
+    document.getElementById("toDate").value = "";
+    selectedLine = "";
+    document.getElementById("filterFlavour").value = "";
+    document.getElementById("filterGrammage").value = "";
+    document.getElementById("filterProduct").value = "";
+    loadDashboard();
+}
+
+function loadDashboard(){
+
+    const payload = {
+        fromDate: document.getElementById("fromDate").value || null,
+        toDate: document.getElementById("toDate").value || null,
+        line: selectedLine || null,
+        flavour: document.getElementById("filterFlavour").value || null,
+        grammage: document.getElementById("filterGrammage").value || null,
+        product_code: document.getElementById("filterProduct").value || null
+    };
+
+    fetch("/api/dashboard_data_v2", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(data => {
+        updateKPIs(data.kpi);
+        renderCharts(data);
+        window._exportData = data;
+    })
+    .catch(err => alert("Error loading dashboard: " + err));
+}
+
+function exportFiltered(){
+    if(!window._exportData){
+        alert("No data loaded");
+        return;
+    }
+    const encoded = encodeURIComponent(JSON.stringify(window._exportData));
+    window.location.href = "/export/dashboard_filtered?data=" + encoded;
+}
+
+function updateKPIs(k){
+    document.getElementById("kpiPass").innerText = k.pass_rate + "%";
+    document.getElementById("kpiOxy").innerText = k.avg_oxygen;
+    document.getElementById("kpiBreak").innerText = k.avg_breakage;
+    document.getElementById("kpiStop").innerText = k.top_stop;
+}
+
+let leakChart, oxyChart, breakChart, stopChart;
+
+function renderCharts(data){
+
+    if(leakChart) leakChart.destroy();
+    if(oxyChart) oxyChart.destroy();
+    if(breakChart) breakChart.destroy();
+    if(stopChart) stopChart.destroy();
+
+    leakChart = new Chart(leakChart, {
+        type: "bar",
+        data: {
+            labels: data.leak.date,
+            datasets: [
+                { label:"Pass", data:data.leak.pass, backgroundColor:"#4CAF50" },
+                { label:"Fail", data:data.leak.fail, backgroundColor:"#E53935" }
+            ]
+        }
+    });
+
+}
+
+loadDashboard();
+
+</script>
+
+{% endblock %}
+
+<button class="button is-light" onclick="history.back()" style="margin-bottom:15px;">
+  ← Back
+</button>
