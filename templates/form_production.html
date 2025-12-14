@@ -2,116 +2,162 @@
 {% block content %}
 
 <style>
-  .form-card { background:#fff; padding:28px; border-radius:18px; box-shadow:0 8px 24px rgba(0,0,0,0.08); }
-  .button-active { background:#3273dc !important; color:#fff !important; }
+  .card-box {
+    max-width: 520px;
+    margin: auto;
+    background: #ffffff;
+    padding: 22px;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-group .button {
+    flex: 1;
+  }
+
+  .button.is-selected {
+    background-color: #3273dc;
+    color: #ffffff;
+  }
+
+  .hidden {
+    display: none;
+  }
 </style>
 
-<div class="form-card">
-  <h1 class="title is-4">📋 Log Entry</h1>
+<div class="card-box">
+  <h1 class="title is-4 has-text-centered">Production Log Entry</h1>
 
-  <form method="post">
+  <form method="POST" id="logForm">
 
     <!-- LINE -->
     <div class="field">
-      <label class="label">Select Line</label>
-      <div style="display:flex; gap:10px;">
-        <button type="button" class="button lineBtn" data-line="Line 1">Line 1</button>
-        <button type="button" class="button lineBtn" data-line="Line 2">Line 2</button>
+      <label class="label">Line *</label>
+      <div class="btn-group">
+        <button type="button" class="button is-light"
+          onclick="setValue('line','Line 1',this)">Line 1</button>
+        <button type="button" class="button is-light"
+          onclick="setValue('line','Line 2',this)">Line 2</button>
       </div>
-      <input type="hidden" name="line" id="lineInput">
+      <input type="hidden" name="line" id="line" required>
     </div>
 
     <!-- ACTION -->
     <div class="field">
-      <label class="label">Action</label>
-      <div style="display:flex; gap:10px;">
-        <button type="button" class="button actionBtn is-success" data-act="Start">Start</button>
-        <button type="button" class="button actionBtn is-danger" data-act="Stop">Stop</button>
+      <label class="label">Action *</label>
+      <div class="btn-group">
+        <button type="button" class="button is-light"
+          onclick="setAction('Start',this)">Start</button>
+        <button type="button" class="button is-light"
+          onclick="setAction('Stop',this)">Stop</button>
       </div>
-      <input type="hidden" name="action" id="actionInput">
+      <input type="hidden" name="action" id="action" required>
     </div>
 
     <!-- STOP REASON -->
-    <div id="stopSection" style="display:none;">
-      <div class="field">
-        <label class="label">Stop Reason</label>
-        <div class="select is-fullwidth">
-          <select id="reasonSelect" name="stop_reason">
-            <option value="">Select reason</option>
-            <option>Blade change</option>
-            <option>Seasoning drum cleaning</option>
-            <option>Banana closure</option>
-            <option>No peeled Banana</option>
-            <option>Routine Maintenance</option>
-            <option>Boiler maintenance</option>
-            <option>CIP</option>
-            <option>Part of failure</option>
-            <option>Packing pending</option>
-            <option>Power failure</option>
-            <option>Other</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="field">
-        <input id="otherInput" class="input" name="stop_other"
-          placeholder="Specify other reason" style="display:none;">
+    <div class="field hidden" id="stopReasonBox">
+      <label class="label">Stop Reason *</label>
+      <div class="select is-fullwidth">
+        <select name="stop_reason" id="stop_reason" onchange="handleOther()">
+          <option value="">Select reason</option>
+          <option>Blade change</option>
+          <option>Seasoning drum cleaning</option>
+          <option>Banana closure</option>
+          <option>No peeled Banana</option>
+          <option>Routine Maintenance</option>
+          <option>Boiler maintenance</option>
+          <option>CIP</option>
+          <option>Part of failure</option>
+          <option>Packing pending</option>
+          <option>Power failure</option>
+          <option>Other</option>
+        </select>
       </div>
     </div>
 
-    <button id="submitBtn" class="button is-link is-fullwidth" disabled>Submit Log</button>
+    <!-- OTHER REASON -->
+    <div class="field hidden" id="otherBox">
+      <label class="label">Specify Other *</label>
+      <input class="input" name="stop_other" id="stop_other"
+        placeholder="Type stop reason">
+    </div>
+
+    <!-- SUBMIT -->
+    <button class="button is-primary is-fullwidth mt-4"
+      id="submitBtn" disabled>
+      Submit Log Entry
+    </button>
 
   </form>
 </div>
 
 <script>
-function enable() {
-  const line = document.getElementById("lineInput").value;
-  const action = document.getElementById("actionInput").value;
-
-  if (action==="Stop") {
-    const reason = document.getElementById("reasonSelect").value;
-    document.getElementById("submitBtn").disabled = !(line && action && reason);
-  } else {
-    document.getElementById("submitBtn").disabled = !(line && action);
-  }
+function setValue(field, value, btn){
+  document.getElementById(field).value = value;
+  btn.parentElement.querySelectorAll('.button').forEach(b=>{
+    b.classList.remove('is-selected');
+  });
+  btn.classList.add('is-selected');
+  validate();
 }
 
-document.querySelectorAll(".lineBtn").forEach(btn=>{
-  btn.onclick = ()=>{
-    document.getElementById("lineInput").value = btn.dataset.line;
-    document.querySelectorAll('.lineBtn').forEach(x=>x.classList.remove("button-active"));
-    btn.classList.add("button-active");
-    enable();
-  };
-});
+function setAction(value, btn){
+  document.getElementById('action').value = value;
 
-document.querySelectorAll(".actionBtn").forEach(btn=>{
-  btn.onclick = ()=>{
-    document.getElementById("actionInput").value = btn.dataset.act;
-    document.querySelectorAll('.actionBtn').forEach(x=>x.classList.remove("button-active"));
-    btn.classList.add("button-active");
+  btn.parentElement.querySelectorAll('.button').forEach(b=>{
+    b.classList.remove('is-selected');
+  });
+  btn.classList.add('is-selected');
 
-    if(btn.dataset.act==="Stop"){
-      document.getElementById("stopSection").style.display = "block";
-    } else {
-      document.getElementById("stopSection").style.display = "none";
+  const stopBox = document.getElementById('stopReasonBox');
+  const otherBox = document.getElementById('otherBox');
+
+  if(value === 'Stop'){
+    stopBox.classList.remove('hidden');
+  } else {
+    stopBox.classList.add('hidden');
+    otherBox.classList.add('hidden');
+    document.getElementById('stop_reason').value = '';
+    document.getElementById('stop_other').value = '';
+  }
+
+  validate();
+}
+
+function handleOther(){
+  const reason = document.getElementById('stop_reason').value;
+  const otherBox = document.getElementById('otherBox');
+
+  if(reason === 'Other'){
+    otherBox.classList.remove('hidden');
+  } else {
+    otherBox.classList.add('hidden');
+    document.getElementById('stop_other').value = '';
+  }
+  validate();
+}
+
+function validate(){
+  const line = document.getElementById('line').value;
+  const action = document.getElementById('action').value;
+  let valid = line && action;
+
+  if(action === 'Stop'){
+    const reason = document.getElementById('stop_reason').value;
+    valid = valid && reason;
+    if(reason === 'Other'){
+      valid = valid && document.getElementById('stop_other').value;
     }
-    enable();
-  };
-});
+  }
 
-document.getElementById("reasonSelect").onchange = ()=>{
-  const v = document.getElementById("reasonSelect").value;
-  document.getElementById("otherInput").style.display = (v==="Other") ? "block":"none";
-  enable();
-};
-
-enable();
+  document.getElementById('submitBtn').disabled = !valid;
+}
 </script>
 
 {% endblock %}
-
-<button class="button is-light" onclick="history.back()" style="margin-bottom:15px;">
-  ← Back
-</button>
