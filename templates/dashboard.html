@@ -10,7 +10,7 @@
   }
 
   .kpi-card {
-    background: white;
+    background: #ffffff;
     padding: 16px;
     border-radius: 14px;
     text-align: center;
@@ -18,13 +18,13 @@
   }
 
   .kpi-value {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     font-weight: bold;
     margin-top: 6px;
   }
 
   .chart-box {
-    background: white;
+    background: #ffffff;
     padding: 14px;
     border-radius: 14px;
     margin-bottom: 18px;
@@ -37,7 +37,7 @@
   }
 </style>
 
-<h1 class="title">📊 Dashboard</h1>
+<h1 class="title has-text-centered">📊 Production Dashboard</h1>
 
 <!-- KPI CARDS -->
 <div class="kpi-grid">
@@ -50,13 +50,13 @@
   <div class="kpi-card">
     <span class="mdi mdi-gas-cylinder mdi-24px"></span>
     <div class="kpi-value" id="kpiOxy">-</div>
-    <div>Avg O₂</div>
+    <div>Avg Oxygen</div>
   </div>
 
   <div class="kpi-card">
     <span class="mdi mdi-chart-bar mdi-24px"></span>
     <div class="kpi-value" id="kpiBreak">-</div>
-    <div>Breakage %</div>
+    <div>Avg Breakage</div>
   </div>
 
   <div class="kpi-card">
@@ -68,7 +68,7 @@
 
 <!-- CHARTS -->
 <div class="chart-box">
-  <h3 class="subtitle">Leak Test (Pass / Fail)</h3>
+  <h3 class="subtitle">Leak Test — Pass / Fail</h3>
   <canvas id="leakChart"></canvas>
 </div>
 
@@ -90,97 +90,108 @@
 <script>
 let leakChart, oxyChart, breakChart, stopChart;
 
-async function loadDashboard() {
-  try {
-    const res = await fetch("/api/dashboard_data_v2", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({})
-    });
+function loadDashboard() {
+  fetch("/api/dashboard_data_v2", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({})
+  })
+  .then(res => res.json())
+  .then(data => {
 
-    if (!res.ok) {
-      throw new Error("Unauthorized or server error");
-    }
+    /* KPI VALUES */
+    document.getElementById("kpiPass").innerText =
+      data.kpi.pass_rate !== undefined ? data.kpi.pass_rate + "%" : "-";
 
-    const data = await res.json();
+    document.getElementById("kpiOxy").innerText =
+      data.kpi.avg_oxygen ?? "-";
 
-    /* KPI */
-    document.getElementById("kpiPass").innerText = data.kpi.pass_rate + "%";
-    document.getElementById("kpiOxy").innerText = data.kpi.avg_oxygen;
-    document.getElementById("kpiBreak").innerText = data.kpi.avg_breakage;
-    document.getElementById("kpiStop").innerText = data.kpi.top_stop;
+    document.getElementById("kpiBreak").innerText =
+      data.kpi.avg_breakage ?? "-";
 
-    /* CLEAN OLD CHARTS */
-    [leakChart, oxyChart, breakChart, stopChart].forEach(c => {
-      if (c) c.destroy();
-    });
+    document.getElementById("kpiStop").innerText =
+      data.kpi.top_stop ?? "-";
 
-    /* LEAK */
-    leakChart = new Chart(leakChartCanvas, {
+    /* DESTROY OLD CHARTS */
+    if (leakChart) leakChart.destroy();
+    if (oxyChart) oxyChart.destroy();
+    if (breakChart) breakChart.destroy();
+    if (stopChart) stopChart.destroy();
+
+    /* LEAK CHART */
+    leakChart = new Chart(document.getElementById("leakChart"), {
       type: "bar",
       data: {
-        labels: data.leak.date,
+        labels: data.leak.date || [],
         datasets: [
-          { label: "Pass", data: data.leak.pass, backgroundColor: "#48c774" },
-          { label: "Fail", data: data.leak.fail, backgroundColor: "#f14668" }
+          {
+            label: "Pass",
+            data: data.leak.pass || [],
+            backgroundColor: "#48c774"
+          },
+          {
+            label: "Fail",
+            data: data.leak.fail || [],
+            backgroundColor: "#f14668"
+          }
         ]
       },
       options: { responsive: true }
     });
 
-    /* OXYGEN */
-    oxyChart = new Chart(oxyChartCanvas, {
+    /* OXYGEN CHART */
+    oxyChart = new Chart(document.getElementById("oxyChart"), {
       type: "line",
       data: {
-        labels: data.oxygen.date,
+        labels: data.oxygen.date || [],
         datasets: [{
           label: "Oxygen %",
-          data: data.oxygen.oxygen,
+          data: data.oxygen.oxygen || [],
           borderColor: "#3273dc",
+          fill: false,
           tension: 0.3
         }]
       },
       options: { responsive: true }
     });
 
-    /* BREAKAGE */
-    breakChart = new Chart(breakChartCanvas, {
+    /* BREAKAGE CHART */
+    breakChart = new Chart(document.getElementById("breakChart"), {
       type: "bar",
       data: {
-        labels: data.breakage.code,
+        labels: data.breakage.code || [],
         datasets: [
-          { label: "Good", data: data.breakage.good, backgroundColor: "#48c774" },
-          { label: "Broken", data: data.breakage.broken, backgroundColor: "#f14668" },
-          { label: "Cluster", data: data.breakage.cluster, backgroundColor: "#ffdd57" },
-          { label: "Residue", data: data.breakage.residue, backgroundColor: "#7957d5" }
+          { label: "Good %", data: data.breakage.good || [], backgroundColor: "#48c774" },
+          { label: "Broken %", data: data.breakage.broken || [], backgroundColor: "#f14668" },
+          { label: "Cluster %", data: data.breakage.cluster || [], backgroundColor: "#ffdd57" },
+          { label: "Residue %", data: data.breakage.residue || [], backgroundColor: "#7957d5" }
         ]
       },
       options: { responsive: true }
     });
 
-    /* STOP */
-    stopChart = new Chart(stopChartCanvas, {
+    /* STOP PIE */
+    stopChart = new Chart(document.getElementById("stopChart"), {
       type: "pie",
       data: {
-        labels: data.stop.label,
+        labels: data.stop.label || [],
         datasets: [{
-          data: data.stop.count,
-          backgroundColor: ["#ff3860","#ffdd57","#48c774","#3273dc","#7957d5"]
+          data: data.stop.count || [],
+          backgroundColor: [
+            "#ff3860", "#ffdd57", "#48c774",
+            "#3273dc", "#7957d5", "#00d1b2"
+          ]
         }]
-      }
+      },
+      options: { responsive: true }
     });
 
-  } catch (err) {
-    alert("Dashboard cannot load. Please login as boss.");
+  })
+  .catch(err => {
+    alert("Dashboard failed to load");
     console.error(err);
-  }
+  });
 }
-
-/* Canvas refs */
-const leakChartCanvas = document.getElementById("leakChart");
-const oxyChartCanvas = document.getElementById("oxyChart");
-const breakChartCanvas = document.getElementById("breakChart");
-const stopChartCanvas = document.getElementById("stopChart");
 
 loadDashboard();
 </script>
