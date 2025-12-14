@@ -2,67 +2,85 @@
 {% block content %}
 
 <style>
-  .login-card {
+  .login-box {
     max-width: 420px;
-    margin: 40px auto;
+    margin: auto;
     background: #ffffff;
     padding: 26px;
     border-radius: 16px;
-    box-shadow: 0 10px 26px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.08);
   }
 
   .login-title {
     text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .login-title h1 {
+    font-size: 1.6rem;
     margin-bottom: 6px;
   }
 
-  .login-subtitle {
-    text-align: center;
+  .login-title p {
     color: #666;
-    margin-bottom: 22px;
     font-size: 0.95rem;
   }
 
-  .input {
-    height: 52px;
-    font-size: 1.2rem;
-    text-align: center;
-    letter-spacing: 4px;
-  }
-
   .button {
-    height: 54px;
-    font-size: 1.2rem;
-    border-radius: 14px;
+    font-size: 1.1rem;
+    height: 48px;
   }
 </style>
 
-<div class="login-card">
+<div class="login-box">
 
-  <h1 class="title login-title">🔐 Login</h1>
-  <p class="login-subtitle">
-    Enter your passcode to access the Beyond Snack portal
-  </p>
+  <div class="login-title">
+    <h1>🔐 Login</h1>
+    <p>Beyond Snack Production Portal</p>
+  </div>
 
-  <form method="post">
+  <form method="POST">
 
+    <!-- EMAIL -->
     <div class="field">
+      <label class="label">Email</label>
       <div class="control has-icons-left">
-        <input class="input"
-               type="password"
-               name="passcode"
-               placeholder="Enter Passcode"
-               required
-               autofocus>
+        <input
+          class="input"
+          type="email"
+          name="email"
+          placeholder="example@drjackfruit.com"
+          required
+        >
         <span class="icon is-left">
-          <i class="mdi mdi-lock"></i>
+          <i class="mdi mdi-email-outline"></i>
         </span>
       </div>
     </div>
 
-    <button class="button is-primary is-fullwidth mt-4">
-      <span class="mdi mdi-login"></span>&nbsp; Login
-    </button>
+    <!-- PASSWORD -->
+    <div class="field">
+      <label class="label">Password</label>
+      <div class="control has-icons-left">
+        <input
+          class="input"
+          type="password"
+          name="password"
+          placeholder="Enter password"
+          required
+        >
+        <span class="icon is-left">
+          <i class="mdi mdi-lock-outline"></i>
+        </span>
+      </div>
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="field mt-4">
+      <button class="button is-primary is-fullwidth">
+        Login
+      </button>
+    </div>
 
   </form>
 
