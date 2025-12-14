@@ -1,28 +1,94 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1 class="title">Main Menu</h1>
+<style>
+  .menu-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 520px;
+    margin: auto;
+  }
 
-<a href="/leak" class="button is-primary is-fullwidth mb-3">
-  <span class="mdi mdi-shield-check"></span>&nbsp; Leak Test
-</a>
+  .menu-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: #363636;
+    text-decoration: none;
+  }
 
-<a href="/oxygen" class="button is-link is-fullwidth mb-3">
-  <span class="mdi mdi-gas-cylinder"></span>&nbsp; Oxygen Test
-</a>
+  .menu-card:hover {
+    background: #f0f4ff;
+  }
 
-<a href="/breakage" class="button is-info is-fullwidth mb-3">
-  <span class="mdi mdi-chart-bar"></span>&nbsp; Breakage Analysis
-</a>
+  .menu-icon {
+    font-size: 28px;
+    color: #3273dc;
+  }
 
-<a href="/log" class="button is-warning is-fullwidth mb-3">
-  <span class="mdi mdi-clock-outline"></span>&nbsp; Log Entry
-</a>
+  .menu-text {
+    flex-grow: 1;
+  }
 
-{% if session.get("role") == "boss" %}
-<a href="/dashboard" class="button is-danger is-fullwidth mb-3">
-  <span class="mdi mdi-view-dashboard"></span>&nbsp; Dashboard & Reports
-</a>
-{% endif %}
+  /* Special boss card */
+  .boss {
+    background: linear-gradient(135deg, #ff3860, #ff7a7a);
+    color: #ffffff;
+  }
+
+  .boss .menu-icon {
+    color: #ffffff;
+  }
+</style>
+
+<h1 class="title has-text-centered">Main Menu</h1>
+
+<div class="menu-grid">
+
+  <!-- LEAK TEST -->
+  <a href="/leak" class="menu-card">
+    <span class="mdi mdi-shield-check menu-icon"></span>
+    <span class="menu-text">Leak Test</span>
+    <span class="mdi mdi-chevron-right"></span>
+  </a>
+
+  <!-- OXYGEN TEST -->
+  <a href="/oxygen" class="menu-card">
+    <span class="mdi mdi-gas-cylinder menu-icon"></span>
+    <span class="menu-text">Oxygen Test</span>
+    <span class="mdi mdi-chevron-right"></span>
+  </a>
+
+  <!-- BREAKAGE -->
+  <a href="/breakage" class="menu-card">
+    <span class="mdi mdi-chart-bar menu-icon"></span>
+    <span class="menu-text">Breakage Analysis</span>
+    <span class="mdi mdi-chevron-right"></span>
+  </a>
+
+  <!-- LOG ENTRY -->
+  <a href="/log" class="menu-card">
+    <span class="mdi mdi-clock-outline menu-icon"></span>
+    <span class="menu-text">Log Entry</span>
+    <span class="mdi mdi-chevron-right"></span>
+  </a>
+
+  {% if session.get("role") == "boss" %}
+  <!-- DASHBOARD -->
+  <a href="/dashboard" class="menu-card boss">
+    <span class="mdi mdi-view-dashboard menu-icon"></span>
+    <span class="menu-text">Dashboard & Reports</span>
+    <span class="mdi mdi-chevron-right"></span>
+  </a>
+  {% endif %}
+
+</div>
 
 {% endblock %}
