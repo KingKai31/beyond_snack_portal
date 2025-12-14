@@ -2,31 +2,51 @@
 {% block content %}
 
 <style>
-  .form-card { background:#fff; padding:28px; border-radius:18px; box-shadow:0 8px 24px rgba(0,0,0,0.08); }
-  .button-active { background:#3273dc !important; color:#fff !important; }
-  .section-title { font-size:1.5rem; font-weight:700; margin-bottom:18px; }
+  .card-box {
+    max-width: 520px;
+    margin: auto;
+    background: #ffffff;
+    padding: 22px;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-group .button {
+    flex: 1;
+  }
+
+  .button.is-selected {
+    background-color: #3273dc;
+    color: #fff;
+  }
 </style>
 
-<div class="form-card">
-  <h1 class="section-title">🧪 Leak Test Entry</h1>
+<div class="card-box">
+  <h1 class="title is-4 has-text-centered">Leak Test</h1>
 
-  <form method="post" enctype="multipart/form-data">
+  <form method="POST" enctype="multipart/form-data" id="leakForm">
 
     <!-- LINE -->
     <div class="field">
-      <label class="label">Select Line</label>
-      <div style="display:flex; gap:10px;">
-        <button type="button" class="button lineBtn" data-line="Line 1">Line 1</button>
-        <button type="button" class="button lineBtn" data-line="Line 2">Line 2</button>
+      <label class="label">Line *</label>
+      <div class="btn-group">
+        <button type="button" class="button is-light" onclick="setValue('line','Line 1',this)">Line 1</button>
+        <button type="button" class="button is-light" onclick="setValue('line','Line 2',this)">Line 2</button>
       </div>
-      <input type="hidden" name="line" id="lineInput">
+      <input type="hidden" name="line" id="line" required>
     </div>
 
     <!-- FLAVOUR -->
     <div class="field">
-      <label class="label">Flavour</label>
+      <label class="label">Flavour *</label>
       <div class="select is-fullwidth">
-        <select name="flavour" id="flavourSelect" required>
+        <select name="flavour" id="flavour" required onchange="checkForm()">
           <option value="">Select flavour</option>
           <option>OS</option><option>PP</option><option>CO</option><option>SP</option>
           <option>DM</option><option>HS</option><option>SC</option><option>MB</option>
@@ -38,82 +58,98 @@
 
     <!-- GRAMMAGE -->
     <div class="field">
-      <label class="label">Grammage (g)</label>
+      <label class="label">Grammage (g) *</label>
       <div class="select is-fullwidth">
-        <select id="grammageSelect" name="grammage" required>
+        <select name="grammage" id="grammage" required onchange="checkForm()">
           <option value="">Select grammage</option>
-          <option>10</option><option>15</option><option>26</option><option>48</option>
-          <option>75</option><option>85</option><option>89</option><option>100</option>
-          <option>125</option><option>150</option><option>250</option><option>300</option>
-          <option>400</option><option>450</option><option>600</option><option>50</option>
-          <option>235</option><option>120</option><option>25</option><option>80</option>
-          <option>70</option><option>320</option>
+          <option>10</option>
+          <option>15</option>
+          <option>25</option>
+          <option>26</option>
+          <option>48</option>
+          <option>50</option>
+          <option>75</option>
+          <option>85</option>
+          <option>89</option>
+          <option>100</option>
+          <option>120</option>
+          <option>125</option>
+          <option>150</option>
+          <option>235</option>
+          <option>250</option>
+          <option>300</option>
+          <option>320</option>
+          <option>400</option>
+          <option>450</option>
+          <option>600</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- PRESSURE -->
+    <div class="field">
+      <label class="label">Pressure (mm Hg) *</label>
+      <div class="select is-fullwidth">
+        <select name="pressure" id="pressure" required onchange="checkForm()">
+          <option value="">Select pressure</option>
+          <option>150</option>
+          <option>200</option>
+          <option>250</option>
+          <option>300</option>
+          <option>350</option>
+          <option>400</option>
+          <option>450</option>
         </select>
       </div>
     </div>
 
     <!-- RESULT -->
     <div class="field">
-      <label class="label">Result</label>
-      <div style="display:flex; gap:10px;">
-        <button type="button" class="button resultBtn is-success" data-result="Pass">Pass</button>
-        <button type="button" class="button resultBtn is-danger" data-result="Fail">Fail</button>
+      <label class="label">Result *</label>
+      <div class="btn-group">
+        <button type="button" class="button is-light" onclick="setValue('result','Pass',this)">Pass</button>
+        <button type="button" class="button is-light" onclick="setValue('result','Fail',this)">Fail</button>
       </div>
-      <input type="hidden" name="result" id="resultInput">
+      <input type="hidden" name="result" id="result" required>
     </div>
 
-    <!-- OPTIONAL -->
+    <!-- PHOTO (OPTIONAL) -->
     <div class="field">
       <label class="label">Photo (optional)</label>
-      <input type="file" class="input" name="photo" accept="image/*">
+      <input class="input" type="file" name="photo" accept="image/*">
     </div>
 
+    <!-- REMARKS (OPTIONAL) -->
     <div class="field">
       <label class="label">Remarks (optional)</label>
-      <input class="input" name="remarks">
+      <textarea class="textarea" name="remarks" placeholder="Optional remarks"></textarea>
     </div>
 
-    <button id="submitBtn" class="button is-link is-fullwidth" disabled>Submit</button>
+    <!-- SUBMIT -->
+    <button class="button is-primary is-fullwidth mt-4" id="submitBtn" disabled>
+      Submit Leak Test
+    </button>
 
   </form>
 </div>
 
 <script>
-function enable() {
-  const ok =
-    document.getElementById("lineInput").value &&
-    document.getElementById("flavourSelect").value &&
-    document.getElementById("grammageSelect").value &&
-    document.getElementById("resultInput").value;
+function setValue(field, value, btn){
+  document.getElementById(field).value = value;
 
-  document.getElementById("submitBtn").disabled = !ok;
+  btn.parentElement.querySelectorAll('.button').forEach(b=>{
+    b.classList.remove('is-selected');
+  });
+  btn.classList.add('is-selected');
+
+  checkForm();
 }
 
-document.querySelectorAll(".lineBtn").forEach(btn=>{
-  btn.onclick = ()=>{
-    document.getElementById("lineInput").value = btn.dataset.line;
-    document.querySelectorAll(".lineBtn").forEach(x=>x.classList.remove("button-active"));
-    btn.classList.add("button-active");
-    enable();
-  };
-});
-
-document.querySelectorAll(".resultBtn").forEach(btn=>{
-  btn.onclick = ()=>{
-    document.getElementById("resultInput").value = btn.dataset.result;
-    document.querySelectorAll(".resultBtn").forEach(x=>x.classList.remove("button-active"));
-    btn.classList.add("button-active");
-    enable();
-  };
-});
-
-["flavourSelect","grammageSelect"].forEach(id=>{
-  document.getElementById(id).onchange = enable;
-});
+function checkForm(){
+  const required = ['line','flavour','grammage','pressure','result'];
+  const allFilled = required.every(id => document.getElementById(id).value);
+  document.getElementById('submitBtn').disabled = !allFilled;
+}
 </script>
 
 {% endblock %}
-
-<button class="button is-light" onclick="history.back()" style="margin-bottom:15px;">
-  ← Back
-</button>
