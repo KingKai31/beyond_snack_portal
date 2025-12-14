@@ -22,8 +22,8 @@
   }
 
   .button.is-selected {
-    background-color: #3273dc;
-    color: #fff;
+    background-color: #3273dc !important;
+    color: #ffffff !important;
   }
 </style>
 
@@ -36,8 +36,10 @@
     <div class="field">
       <label class="label">Line *</label>
       <div class="btn-group">
-        <button type="button" class="button is-light" onclick="setValue('line','Line 1',this)">Line 1</button>
-        <button type="button" class="button is-light" onclick="setValue('line','Line 2',this)">Line 2</button>
+        <button type="button" class="button"
+          onclick="setValue('line','Line 1',this)">Line 1</button>
+        <button type="button" class="button"
+          onclick="setValue('line','Line 2',this)">Line 2</button>
       </div>
       <input type="hidden" name="line" id="line" required>
     </div>
@@ -51,12 +53,13 @@
           <option>OS</option><option>PP</option><option>CO</option><option>SP</option>
           <option>DM</option><option>HS</option><option>SC</option><option>MB</option>
           <option>DP</option><option>RS</option><option>TO</option><option>SN</option>
-          <option>PU</option><option>AC</option><option>MA</option><option>Combo Pack</option>
+          <option>PU</option><option>AC</option><option>MA</option>
+          <option>Combo Pack</option>
         </select>
       </div>
     </div>
 
-    <!-- GRAMMAGE (25 ADDED) -->
+    <!-- GRAMMAGE -->
     <div class="field">
       <label class="label">Grammage (g) *</label>
       <div class="select is-fullwidth">
@@ -89,33 +92,47 @@
     <!-- TEMPERATURE -->
     <div class="field">
       <label class="label">Temperature (°C) *</label>
-      <input class="input" type="number" step="0.01" inputmode="decimal"
-             name="temperature" id="temperature"
-             required oninput="checkForm()">
+      <input class="input"
+             type="number"
+             step="0.01"
+             inputmode="decimal"
+             pattern="[0-9]*[.,]?[0-9]*"
+             name="temperature"
+             id="temperature"
+             required
+             oninput="checkForm()">
     </div>
 
     <!-- OXYGEN -->
     <div class="field">
       <label class="label">Oxygen (%) *</label>
-      <input class="input" type="number" step="0.01" inputmode="decimal"
-             name="oxygen" id="oxygen"
-             required oninput="checkForm()">
+      <input class="input"
+             type="number"
+             step="0.01"
+             inputmode="decimal"
+             pattern="[0-9]*[.,]?[0-9]*"
+             name="oxygen"
+             id="oxygen"
+             required
+             oninput="checkForm()">
     </div>
 
-    <!-- PHOTO (OPTIONAL) -->
+    <!-- PHOTO -->
     <div class="field">
       <label class="label">Photo (optional)</label>
       <input class="input" type="file" name="photo" accept="image/*">
     </div>
 
-    <!-- REMARKS (OPTIONAL) -->
+    <!-- REMARKS -->
     <div class="field">
       <label class="label">Remarks (optional)</label>
-      <textarea class="textarea" name="remarks"></textarea>
+      <textarea class="textarea" name="remarks"
+        placeholder="Optional remarks"></textarea>
     </div>
 
     <!-- SUBMIT -->
-    <button class="button is-primary is-fullwidth mt-4" id="submitBtn" disabled>
+    <button class="button is-primary is-fullwidth mt-4"
+            id="submitBtn" disabled>
       Submit Oxygen Test
     </button>
 
@@ -123,18 +140,20 @@
 </div>
 
 <script>
-function setValue(field, value, btn){
+function setValue(field, value, btn) {
   document.getElementById(field).value = value;
-  btn.parentElement.querySelectorAll('.button').forEach(b=>{
-    b.classList.remove('is-selected');
-  });
+
+  btn.parentElement.querySelectorAll('.button')
+    .forEach(b => b.classList.remove('is-selected'));
+
   btn.classList.add('is-selected');
   checkForm();
 }
 
-function checkForm(){
+function checkForm() {
   const required = ['line','flavour','grammage','temperature','oxygen'];
-  const ok = required.every(id => document.getElementById(id).value);
+  const ok = required.every(id =>
+    document.getElementById(id).value !== '');
   document.getElementById('submitBtn').disabled = !ok;
 }
 </script>
