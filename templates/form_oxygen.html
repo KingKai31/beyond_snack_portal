@@ -2,31 +2,52 @@
 {% block content %}
 
 <style>
-  .form-card { background:#fff; padding:28px; border-radius:18px; box-shadow:0 8px 24px rgba(0,0,0,0.08); }
-  .button-active { background:#3273dc !important; color:#fff !important; }
+  .card-box {
+    max-width: 520px;
+    margin: auto;
+    background: #ffffff;
+    padding: 22px;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-group .button {
+    flex: 1;
+  }
+
+  .button.is-selected {
+    background-color: #3273dc;
+    color: #fff;
+  }
 </style>
 
-<div class="form-card">
-  <h1 class="title is-4">🌬️ Oxygen Test Entry</h1>
+<div class="card-box">
+  <h1 class="title is-4 has-text-centered">Oxygen Test</h1>
 
-  <form method="post" enctype="multipart/form-data">
+  <form method="POST" enctype="multipart/form-data" id="oxygenForm">
 
     <!-- LINE -->
     <div class="field">
-      <label class="label">Select Line</label>
-      <div style="display:flex; gap:10px;">
-        <button type="button" class="button lineBtn" data-line="Line 1">Line 1</button>
-        <button type="button" class="button lineBtn" data-line="Line 2">Line 2</button>
+      <label class="label">Line *</label>
+      <div class="btn-group">
+        <button type="button" class="button is-light" onclick="setValue('line','Line 1',this)">Line 1</button>
+        <button type="button" class="button is-light" onclick="setValue('line','Line 2',this)">Line 2</button>
       </div>
-      <input type="hidden" name="line" id="lineInput">
+      <input type="hidden" name="line" id="line" required>
     </div>
 
     <!-- FLAVOUR -->
     <div class="field">
-      <label class="label">Flavour</label>
+      <label class="label">Flavour *</label>
       <div class="select is-fullwidth">
-        <select id="flavourSelect" name="flavour" required>
-          <option value="">Select</option>
+        <select name="flavour" id="flavour" required onchange="checkForm()">
+          <option value="">Select flavour</option>
           <option>OS</option><option>PP</option><option>CO</option><option>SP</option>
           <option>DM</option><option>HS</option><option>SC</option><option>MB</option>
           <option>DP</option><option>RS</option><option>TO</option><option>SN</option>
@@ -35,86 +56,87 @@
       </div>
     </div>
 
-    <!-- GRAMMAGE -->
+    <!-- GRAMMAGE (25 ADDED) -->
     <div class="field">
-      <label class="label">Grammage</label>
+      <label class="label">Grammage (g) *</label>
       <div class="select is-fullwidth">
-        <select id="grammageSelect" name="grammage" required>
-          <option value="">Select</option>
-          <option>10</option><option>15</option><option>26</option><option>48</option>
-          <option>75</option><option>85</option><option>89</option><option>100</option>
-          <option>125</option><option>150</option><option>250</option><option>300</option>
-          <option>400</option><option>450</option><option>600</option><option>50</option>
-          <option>235</option><option>120</option><option>25</option><option>80</option>
-          <option>70</option><option>320</option>
+        <select name="grammage" id="grammage" required onchange="checkForm()">
+          <option value="">Select grammage</option>
+          <option>10</option>
+          <option>15</option>
+          <option>25</option>
+          <option>26</option>
+          <option>48</option>
+          <option>50</option>
+          <option>75</option>
+          <option>85</option>
+          <option>89</option>
+          <option>100</option>
+          <option>120</option>
+          <option>125</option>
+          <option>150</option>
+          <option>235</option>
+          <option>250</option>
+          <option>300</option>
+          <option>320</option>
+          <option>400</option>
+          <option>450</option>
+          <option>600</option>
         </select>
       </div>
     </div>
 
     <!-- TEMPERATURE -->
     <div class="field">
-      <label class="label">Temperature (°C)</label>
-      <input class="input"
-        id="temp"
-        name="temperature"
-        required
-        inputmode="decimal"
-        pattern="[0-9]*\.?[0-9]*"
-        autocomplete="off"
-        onbeforeinput="if(event.data && !event.data.match(/^[0-9.]$/)) event.preventDefault();"
-        onkeypress="return /[0-9.]/.test(event.key);"
-        onpaste="return false;"
-        oninput="this.value=this.value.replace(/[^0-9.]/g,'');">
+      <label class="label">Temperature (°C) *</label>
+      <input class="input" type="number" step="0.01" inputmode="decimal"
+             name="temperature" id="temperature"
+             required oninput="checkForm()">
     </div>
 
     <!-- OXYGEN -->
     <div class="field">
-      <label class="label">Oxygen %</label>
-      <input class="input"
-        id="oxy"
-        name="oxygen"
-        required
-        inputmode="decimal"
-        pattern="[0-9]*\.?[0-9]*"
-        autocomplete="off"
-        onbeforeinput="if(event.data && !event.data.match(/^[0-9.]$/)) event.preventDefault();"
-        onkeypress="return /[0-9.]/.test(event.key);"
-        onpaste="return false;"
-        oninput="this.value=this.value.replace(/[^0-9.]/g,'');">
+      <label class="label">Oxygen (%) *</label>
+      <input class="input" type="number" step="0.01" inputmode="decimal"
+             name="oxygen" id="oxygen"
+             required oninput="checkForm()">
     </div>
 
-    <button id="submitBtn" class="button is-link is-fullwidth" disabled>Submit</button>
+    <!-- PHOTO (OPTIONAL) -->
+    <div class="field">
+      <label class="label">Photo (optional)</label>
+      <input class="input" type="file" name="photo" accept="image/*">
+    </div>
+
+    <!-- REMARKS (OPTIONAL) -->
+    <div class="field">
+      <label class="label">Remarks (optional)</label>
+      <textarea class="textarea" name="remarks"></textarea>
+    </div>
+
+    <!-- SUBMIT -->
+    <button class="button is-primary is-fullwidth mt-4" id="submitBtn" disabled>
+      Submit Oxygen Test
+    </button>
 
   </form>
 </div>
 
 <script>
-function enable() {
-  const ok =
-    document.getElementById("lineInput").value &&
-    document.getElementById("flavourSelect").value &&
-    document.getElementById("grammageSelect").value &&
-    document.getElementById("temp").value &&
-    document.getElementById("oxy").value;
-
-  document.getElementById("submitBtn").disabled = !ok;
+function setValue(field, value, btn){
+  document.getElementById(field).value = value;
+  btn.parentElement.querySelectorAll('.button').forEach(b=>{
+    b.classList.remove('is-selected');
+  });
+  btn.classList.add('is-selected');
+  checkForm();
 }
 
-["flavourSelect","grammageSelect","temp","oxy"].forEach(id=>{
-  document.getElementById(id).oninput = enable;
-});
-
-document.querySelectorAll(".lineBtn").forEach(btn=>{
-  btn.onclick = ()=>{
-    document.getElementById("lineInput").value = btn.dataset.line;
-    document.querySelectorAll(".lineBtn").forEach(x=>x.classList.remove("button-active"));
-    btn.classList.add("button-active");
-    enable();
-  };
-});
+function checkForm(){
+  const required = ['line','flavour','grammage','temperature','oxygen'];
+  const ok = required.every(id => document.getElementById(id).value);
+  document.getElementById('submitBtn').disabled = !ok;
+}
 </script>
 
 {% endblock %}
-<button class="button is-light" onclick="history.back()" style="margin-bottom:15px;">
-  ← Back
-</button>
