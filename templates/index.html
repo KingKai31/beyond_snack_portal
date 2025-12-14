@@ -37,19 +37,19 @@
     flex-grow: 1;
   }
 
-  /* Boss-only cards */
-  .boss-dashboard {
+  /* Manager cards */
+  .manager-dashboard {
     background: linear-gradient(135deg, #3273dc, #5a9bff);
     color: #ffffff;
   }
 
-  .boss-reports {
+  .manager-reports {
     background: linear-gradient(135deg, #23d160, #48c774);
     color: #ffffff;
   }
 
-  .boss-dashboard .menu-icon,
-  .boss-reports .menu-icon {
+  .manager-dashboard .menu-icon,
+  .manager-reports .menu-icon {
     color: #ffffff;
   }
 </style>
@@ -58,48 +58,53 @@
 
 <div class="menu-grid">
 
-  <!-- LEAK TEST -->
-  <a href="/leak" class="menu-card">
+  <!-- LOG ENTRY (Log + Manager) -->
+  {% if session.get("role") in ["log", "manager"] %}
+  <a href="{{ url_for('log_page') }}" class="menu-card">
+    <span class="mdi mdi-clock-outline menu-icon"></span>
+    <span class="menu-text">Log Entry</span>
+    <span class="mdi mdi-chevron-right"></span>
+  </a>
+  {% endif %}
+
+  <!-- QUALITY PAGES (Quality + Manager) -->
+  {% if session.get("role") in ["quality", "manager"] %}
+
+  <a href="{{ url_for('leak_page') }}" class="menu-card">
     <span class="mdi mdi-shield-check menu-icon"></span>
     <span class="menu-text">Leak Test</span>
     <span class="mdi mdi-chevron-right"></span>
   </a>
 
-  <!-- OXYGEN TEST -->
-  <a href="/oxygen" class="menu-card">
+  <a href="{{ url_for('oxygen_page') }}" class="menu-card">
     <span class="mdi mdi-gas-cylinder menu-icon"></span>
     <span class="menu-text">Oxygen Test</span>
     <span class="mdi mdi-chevron-right"></span>
   </a>
 
-  <!-- BREAKAGE -->
-  <a href="/breakage" class="menu-card">
+  <a href="{{ url_for('breakage_page') }}" class="menu-card">
     <span class="mdi mdi-chart-bar menu-icon"></span>
     <span class="menu-text">Breakage Analysis</span>
     <span class="mdi mdi-chevron-right"></span>
   </a>
 
-  <!-- LOG ENTRY -->
-  <a href="/log" class="menu-card">
-    <span class="mdi mdi-clock-outline menu-icon"></span>
-    <span class="menu-text">Log Entry</span>
-    <span class="mdi mdi-chevron-right"></span>
-  </a>
+  {% endif %}
 
-  {% if session.get("role") == "boss" %}
-  <!-- DASHBOARD (ANALYTICS ONLY) -->
-  <a href="/dashboard" class="menu-card boss-dashboard">
+  <!-- MANAGER ONLY -->
+  {% if session.get("role") == "manager" %}
+
+  <a href="{{ url_for('dashboard') }}" class="menu-card manager-dashboard">
     <span class="mdi mdi-view-dashboard menu-icon"></span>
     <span class="menu-text">Dashboard</span>
     <span class="mdi mdi-chevron-right"></span>
   </a>
 
-  <!-- REPORTS (EXCEL DOWNLOADS ONLY) -->
-  <a href="/reports" class="menu-card boss-reports">
+  <a href="{{ url_for('reports') }}" class="menu-card manager-reports">
     <span class="mdi mdi-file-excel menu-icon"></span>
     <span class="menu-text">Reports & Downloads</span>
     <span class="mdi mdi-chevron-right"></span>
   </a>
+
   {% endif %}
 
 </div>
