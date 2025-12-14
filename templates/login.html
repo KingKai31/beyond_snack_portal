@@ -1,16 +1,71 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1 class="title">Login</h1>
-<p>Enter your passcode to access the Beyond Snack portal.</p>
+<style>
+  .login-card {
+    max-width: 420px;
+    margin: 40px auto;
+    background: #ffffff;
+    padding: 26px;
+    border-radius: 16px;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.1);
+  }
 
-<form method="post">
-  <div class="field">
-    <label class="label">Passcode</label>
-    <input class="input" name="passcode" required>
-  </div>
+  .login-title {
+    text-align: center;
+    margin-bottom: 6px;
+  }
 
-  <button class="button is-link is-fullwidth">Login</button>
-</form>
+  .login-subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 22px;
+    font-size: 0.95rem;
+  }
+
+  .input {
+    height: 52px;
+    font-size: 1.2rem;
+    text-align: center;
+    letter-spacing: 4px;
+  }
+
+  .button {
+    height: 54px;
+    font-size: 1.2rem;
+    border-radius: 14px;
+  }
+</style>
+
+<div class="login-card">
+
+  <h1 class="title login-title">🔐 Login</h1>
+  <p class="login-subtitle">
+    Enter your passcode to access the Beyond Snack portal
+  </p>
+
+  <form method="post">
+
+    <div class="field">
+      <div class="control has-icons-left">
+        <input class="input"
+               type="password"
+               name="passcode"
+               placeholder="Enter Passcode"
+               required
+               autofocus>
+        <span class="icon is-left">
+          <i class="mdi mdi-lock"></i>
+        </span>
+      </div>
+    </div>
+
+    <button class="button is-primary is-fullwidth mt-4">
+      <span class="mdi mdi-login"></span>&nbsp; Login
+    </button>
+
+  </form>
+
+</div>
 
 {% endblock %}
