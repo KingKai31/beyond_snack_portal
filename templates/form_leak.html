@@ -22,24 +22,24 @@
   }
 
   .button.is-selected {
-    background-color: #3273dc !important;
-    color: #ffffff !important;
+    background-color: #3273dc;
+    color: #ffffff;
   }
 </style>
 
 <div class="card-box">
   <h1 class="title is-4 has-text-centered">Leak Test</h1>
 
-  <form method="POST" enctype="multipart/form-data" id="leakForm">
+  <form method="POST" id="leakForm">
 
     <!-- LINE -->
     <div class="field">
       <label class="label">Line *</label>
       <div class="btn-group">
-        <button type="button" class="button"
-          onclick="setValue('line','Line 1',this)">Line 1</button>
-        <button type="button" class="button"
-          onclick="setValue('line','Line 2',this)">Line 2</button>
+        <button type="button" class="button is-light"
+                onclick="setValue('line','Line 1',this)">Line 1</button>
+        <button type="button" class="button is-light"
+                onclick="setValue('line','Line 2',this)">Line 2</button>
       </div>
       <input type="hidden" name="line" id="line" required>
     </div>
@@ -110,25 +110,19 @@
     <div class="field">
       <label class="label">Result *</label>
       <div class="btn-group">
-        <button type="button" class="button is-success"
-          onclick="setValue('result','Pass',this)">Pass</button>
-        <button type="button" class="button is-danger"
-          onclick="setValue('result','Fail',this)">Fail</button>
+        <button type="button" class="button is-light"
+                onclick="setValue('result','Pass',this)">Pass</button>
+        <button type="button" class="button is-light"
+                onclick="setValue('result','Fail',this)">Fail</button>
       </div>
       <input type="hidden" name="result" id="result" required>
-    </div>
-
-    <!-- PHOTO -->
-    <div class="field">
-      <label class="label">Photo (optional)</label>
-      <input class="input" type="file" name="photo" accept="image/*">
     </div>
 
     <!-- REMARKS -->
     <div class="field">
       <label class="label">Remarks (optional)</label>
       <textarea class="textarea" name="remarks"
-        placeholder="Optional remarks"></textarea>
+                placeholder="Optional remarks"></textarea>
     </div>
 
     <!-- SUBMIT -->
@@ -144,17 +138,17 @@
 function setValue(field, value, btn) {
   document.getElementById(field).value = value;
 
-  btn.parentElement.querySelectorAll('.button')
-    .forEach(b => b.classList.remove('is-selected'));
-
+  btn.parentElement.querySelectorAll('.button').forEach(b => {
+    b.classList.remove('is-selected');
+  });
   btn.classList.add('is-selected');
+
   checkForm();
 }
 
 function checkForm() {
-  const required = ['line','flavour','grammage','pressure','result'];
-  const ok = required.every(id =>
-    document.getElementById(id).value !== '');
+  const required = ['line', 'flavour', 'grammage', 'pressure', 'result'];
+  const ok = required.every(id => document.getElementById(id).value);
   document.getElementById('submitBtn').disabled = !ok;
 }
 </script>
