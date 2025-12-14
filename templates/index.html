@@ -37,13 +37,19 @@
     flex-grow: 1;
   }
 
-  /* Special boss card */
-  .boss {
-    background: linear-gradient(135deg, #ff3860, #ff7a7a);
+  /* Boss-only cards */
+  .boss-dashboard {
+    background: linear-gradient(135deg, #3273dc, #5a9bff);
     color: #ffffff;
   }
 
-  .boss .menu-icon {
+  .boss-reports {
+    background: linear-gradient(135deg, #23d160, #48c774);
+    color: #ffffff;
+  }
+
+  .boss-dashboard .menu-icon,
+  .boss-reports .menu-icon {
     color: #ffffff;
   }
 </style>
@@ -81,10 +87,17 @@
   </a>
 
   {% if session.get("role") == "boss" %}
-  <!-- DASHBOARD -->
-  <a href="/dashboard" class="menu-card boss">
+  <!-- DASHBOARD (ANALYTICS ONLY) -->
+  <a href="/dashboard" class="menu-card boss-dashboard">
     <span class="mdi mdi-view-dashboard menu-icon"></span>
-    <span class="menu-text">Dashboard & Reports</span>
+    <span class="menu-text">Dashboard</span>
+    <span class="mdi mdi-chevron-right"></span>
+  </a>
+
+  <!-- REPORTS (EXCEL DOWNLOADS ONLY) -->
+  <a href="/reports" class="menu-card boss-reports">
+    <span class="mdi mdi-file-excel menu-icon"></span>
+    <span class="menu-text">Reports & Downloads</span>
     <span class="mdi mdi-chevron-right"></span>
   </a>
   {% endif %}
