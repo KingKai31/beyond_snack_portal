@@ -43,7 +43,7 @@
 <div class="kpi-grid">
   <div class="kpi-card">
     <span class="mdi mdi-check-circle-outline mdi-24px"></span>
-    <div class="kpi-value" id="kpiPass">0%</div>
+    <div class="kpi-value" id="kpiPass">-</div>
     <div>Leak Pass %</div>
   </div>
 
@@ -90,14 +90,19 @@
 <script>
 let leakChart, oxyChart, breakChart, stopChart;
 
-function loadDashboard() {
-  fetch("/api/dashboard_data_v2", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({})
-  })
-  .then(res => res.json())
-  .then(data => {
+async function loadDashboard() {
+  try {
+    const res = await fetch("/api/dashboard_data_v2", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({})
+    });
+
+    if (!res.ok) {
+      throw new Error("Unauthorized or server error");
+    }
+
+    const data = await res.json();
 
     /* KPI */
     document.getElementById("kpiPass").innerText = data.kpi.pass_rate + "%";
@@ -105,14 +110,13 @@ function loadDashboard() {
     document.getElementById("kpiBreak").innerText = data.kpi.avg_breakage;
     document.getElementById("kpiStop").innerText = data.kpi.top_stop;
 
-    /* DESTROY OLD CHARTS */
-    if (leakChart) leakChart.destroy();
-    if (oxyChart) oxyChart.destroy();
-    if (breakChart) breakChart.destroy();
-    if (stopChart) stopChart.destroy();
+    /* CLEAN OLD CHARTS */
+    [leakChart, oxyChart, breakChart, stopChart].forEach(c => {
+      if (c) c.destroy();
+    });
 
-    /* LEAK CHART */
-    leakChart = new Chart(document.getElementById("leakChart"), {
+    /* LEAK */
+    leakChart = new Chart(leakChartCanvas, {
       type: "bar",
       data: {
         labels: data.leak.date,
@@ -124,8 +128,8 @@ function loadDashboard() {
       options: { responsive: true }
     });
 
-    /* OXYGEN CHART */
-    oxyChart = new Chart(document.getElementById("oxyChart"), {
+    /* OXYGEN */
+    oxyChart = new Chart(oxyChartCanvas, {
       type: "line",
       data: {
         labels: data.oxygen.date,
@@ -133,49 +137,50 @@ function loadDashboard() {
           label: "Oxygen %",
           data: data.oxygen.oxygen,
           borderColor: "#3273dc",
-          fill: false,
           tension: 0.3
         }]
       },
       options: { responsive: true }
     });
 
-    /* BREAKAGE CHART */
-    breakChart = new Chart(document.getElementById("breakChart"), {
+    /* BREAKAGE */
+    breakChart = new Chart(breakChartCanvas, {
       type: "bar",
       data: {
         labels: data.breakage.code,
         datasets: [
-          { label: "Good %", data: data.breakage.good, backgroundColor: "#48c774" },
-          { label: "Broken %", data: data.breakage.broken, backgroundColor: "#f14668" },
-          { label: "Cluster %", data: data.breakage.cluster, backgroundColor: "#ffdd57" },
-          { label: "Residue %", data: data.breakage.residue, backgroundColor: "#7957d5" }
+          { label: "Good", data: data.breakage.good, backgroundColor: "#48c774" },
+          { label: "Broken", data: data.breakage.broken, backgroundColor: "#f14668" },
+          { label: "Cluster", data: data.breakage.cluster, backgroundColor: "#ffdd57" },
+          { label: "Residue", data: data.breakage.residue, backgroundColor: "#7957d5" }
         ]
       },
       options: { responsive: true }
     });
 
-    /* STOP PIE */
-    stopChart = new Chart(document.getElementById("stopChart"), {
+    /* STOP */
+    stopChart = new Chart(stopChartCanvas, {
       type: "pie",
       data: {
         labels: data.stop.label,
         datasets: [{
           data: data.stop.count,
-          backgroundColor: [
-            "#ff3860","#ffdd57","#48c774","#3273dc","#7957d5","#00d1b2"
-          ]
+          backgroundColor: ["#ff3860","#ffdd57","#48c774","#3273dc","#7957d5"]
         }]
-      },
-      options: { responsive: true }
+      }
     });
 
-  })
-  .catch(err => {
-    alert("Dashboard load failed");
+  } catch (err) {
+    alert("Dashboard cannot load. Please login as boss.");
     console.error(err);
-  });
+  }
 }
+
+/* Canvas refs */
+const leakChartCanvas = document.getElementById("leakChart");
+const oxyChartCanvas = document.getElementById("oxyChart");
+const breakChartCanvas = document.getElementById("breakChart");
+const stopChartCanvas = document.getElementById("stopChart");
 
 loadDashboard();
 </script>
