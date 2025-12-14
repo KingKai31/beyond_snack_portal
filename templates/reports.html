@@ -1,13 +1,83 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1 class="title">Reports & Downloads</h1>
+<style>
+  .reports-container {
+    max-width: 520px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
 
-<div class="box">
-  <a class="button is-link is-fullwidth" href="{{ url_for('export_leak') }}">Download Leak Test Data</a><br>
-  <a class="button is-link is-fullwidth" href="{{ url_for('export_oxygen') }}">Download Oxygen Test Data</a><br>
-  <a class="button is-link is-fullwidth" href="{{ url_for('export_breakage') }}">Download Breakage Data</a><br>
-  <a class="button is-link is-fullwidth" href="{{ url_for('export_log') }}">Download Production Log</a><br>
+  .report-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+    text-decoration: none;
+    color: #363636;
+    font-size: 1.05rem;
+    font-weight: 500;
+  }
+
+  .report-card:hover {
+    background: #f0f4ff;
+  }
+
+  .report-icon {
+    font-size: 28px;
+    color: #3273dc;
+  }
+
+  .report-text {
+    flex-grow: 1;
+  }
+
+  .report-arrow {
+    font-size: 20px;
+    color: #999;
+  }
+</style>
+
+<h1 class="title has-text-centered">📥 Reports & Downloads</h1>
+<p class="has-text-centered mb-4" style="color:#666;">
+  Download Excel reports for analysis and records
+</p>
+
+<div class="reports-container">
+
+  <!-- LEAK TEST -->
+  <a href="{{ url_for('export_leak') }}" class="report-card">
+    <span class="mdi mdi-shield-check report-icon"></span>
+    <span class="report-text">Leak Test Data</span>
+    <span class="mdi mdi-download report-arrow"></span>
+  </a>
+
+  <!-- OXYGEN TEST -->
+  <a href="{{ url_for('export_oxygen') }}" class="report-card">
+    <span class="mdi mdi-gas-cylinder report-icon"></span>
+    <span class="report-text">Oxygen Test Data</span>
+    <span class="mdi mdi-download report-arrow"></span>
+  </a>
+
+  <!-- BREAKAGE -->
+  <a href="{{ url_for('export_breakage') }}" class="report-card">
+    <span class="mdi mdi-chart-bar report-icon"></span>
+    <span class="report-text">Breakage Analysis Data</span>
+    <span class="mdi mdi-download report-arrow"></span>
+  </a>
+
+  <!-- PRODUCTION LOG -->
+  <a href="{{ url_for('export_log') }}" class="report-card">
+    <span class="mdi mdi-clock-outline report-icon"></span>
+    <span class="report-text">Production Log</span>
+    <span class="mdi mdi-download report-arrow"></span>
+  </a>
+
 </div>
 
 {% endblock %}
