@@ -2,161 +2,140 @@
 {% block content %}
 
 <style>
-  .form-card { 
-    background:#fff; 
-    padding:28px; 
-    border-radius:18px; 
-    box-shadow:0 8px 24px rgba(0,0,0,0.08); 
+  .card-box {
+    max-width: 520px;
+    margin: auto;
+    background: #ffffff;
+    padding: 22px;
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
   }
-  .button-active { 
-    background:#3273dc !important; 
-    color:#fff !important; 
+
+  .btn-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-group .button {
+    flex: 1;
+  }
+
+  .button.is-selected {
+    background-color: #3273dc;
+    color: #ffffff;
   }
 </style>
 
-<div class="form-card">
-  <h1 class="title is-4">🍟 Breakage Analysis</h1>
+<div class="card-box">
+  <h1 class="title is-4 has-text-centered">Breakage Analysis</h1>
 
-  <form method="post">
+  <form method="POST" enctype="multipart/form-data" id="breakForm">
 
     <!-- LINE -->
     <div class="field">
-      <label class="label">Select Line</label>
-      <div style="display:flex; gap:10px;">
-        <button type="button" class="button lineBtn" data-line="Line 1">Line 1</button>
-        <button type="button" class="button lineBtn" data-line="Line 2">Line 2</button>
+      <label class="label">Line *</label>
+      <div class="btn-group">
+        <button type="button" class="button is-light"
+          onclick="setValue('line','Line 1',this)">Line 1</button>
+        <button type="button" class="button is-light"
+          onclick="setValue('line','Line 2',this)">Line 2</button>
       </div>
-      <input type="hidden" id="lineInput" name="line">
+      <input type="hidden" name="line" id="line" required>
     </div>
 
     <!-- PRODUCT CODE -->
     <div class="field">
-      <label class="label">Product Code</label>
+      <label class="label">Product Code *</label>
       <div class="select is-fullwidth">
-        <select id="productSelect" name="product_code" required>
-          <option value="">Select</option>
-
-          <option>OS10G</option>
-          <option>PP10G</option>
-          <option>CO10G</option>
-          <option>SP10G</option>
-          <option>DM10G</option>
-          <option>HS10G</option>
-
-          <option>OS26G</option>
-          <option>PP26G</option>
-          <option>DM26G</option>
-          <option>HS26G</option>
-
-          <option>OS75G</option>
-          <option>PP75G</option>
-          <option>DM75G</option>
-          <option>HS75G</option>
-
-          <option>OS150G</option>
-          <option>PP150G</option>
-          <option>DM150G</option>
-          <option>HS150G</option>
-
+        <select name="product_code" id="product_code" required onchange="checkForm()">
+          <option value="">Select product code</option>
+          <option>OS10G</option><option>PP10G</option><option>CO10G</option><option>SP10G</option>
+          <option>DM10G</option><option>HS10G</option>
+          <option>OS25G</option><option>PP25G</option><option>CO25G</option><option>SP25G</option>
+          <option>OS26G</option><option>PP26G</option><option>CO26G</option><option>SP26G</option>
+          <option>DM26G</option><option>HS26G</option>
+          <option>OS48G</option><option>PP48G</option><option>CO48G</option><option>SP48G</option>
+          <option>DM48G</option><option>HS48G</option>
+          <option>OS75G</option><option>PP75G</option><option>CO75G</option><option>SP75G</option>
+          <option>DM75G</option><option>HS75G</option>
+          <option>OS100G</option><option>PP100G</option><option>CO100G</option><option>SP100G</option>
+          <option>DM100G</option><option>HS100G</option>
+          <option>OS150G</option><option>PP150G</option><option>CO150G</option><option>SP150G</option>
+          <option>DM150G</option><option>HS150G</option>
+          <option>CPOSPPCO300G</option>
+          <option>CPOSPPCO600G</option>
         </select>
       </div>
     </div>
 
-    <!-- NUMERIC FIELDS -->
+    <!-- GOOD % -->
     <div class="field">
-      <label class="label">Good Chips %</label>
-      <input class="input"
-        id="good"
-        name="good"
-        required
-        inputmode="decimal"
-        pattern="[0-9]*\.?[0-9]*"
-        autocomplete="off"
-        onbeforeinput="if(event.data && !event.data.match(/^[0-9.]$/)) event.preventDefault();"
-        onkeypress="return /[0-9.]/.test(event.key);"
-        onpaste="return false;"
-        oninput="this.value=this.value.replace(/[^0-9.]/g,'');">
+      <label class="label">Good Chips % *</label>
+      <input class="input" type="number" step="0.01" inputmode="decimal"
+        name="good" id="good" required oninput="checkForm()">
     </div>
 
+    <!-- BROKEN % -->
     <div class="field">
-      <label class="label">Broken Chips %</label>
-      <input class="input"
-        id="broken"
-        name="broken"
-        required
-        inputmode="decimal"
-        pattern="[0-9]*\.?[0-9]*"
-        autocomplete="off"
-        onbeforeinput="if(event.data && !event.data.match(/^[0-9.]$/)) event.preventDefault();"
-        onkeypress="return /[0-9.]/.test(event.key);"
-        onpaste="return false;"
-        oninput="this.value=this.value.replace(/[^0-9.]/g,'');">
+      <label class="label">Broken Chips % *</label>
+      <input class="input" type="number" step="0.01" inputmode="decimal"
+        name="broken" id="broken" required oninput="checkForm()">
     </div>
 
+    <!-- CLUSTER % -->
     <div class="field">
-      <label class="label">Cluster %</label>
-      <input class="input"
-        id="cluster"
-        name="cluster"
-        required
-        inputmode="decimal"
-        pattern="[0-9]*\.?[0-9]*"
-        autocomplete="off"
-        onbeforeinput="if(event.data && !event.data.match(/^[0-9.]$/)) event.preventDefault();"
-        onkeypress="return /[0-9.]/.test(event.key);"
-        onpaste="return false;"
-        oninput="this.value=this.value.replace(/[^0-9.]/g,'');">
+      <label class="label">Cluster % *</label>
+      <input class="input" type="number" step="0.01" inputmode="decimal"
+        name="cluster" id="cluster" required oninput="checkForm()">
     </div>
 
+    <!-- RESIDUE % -->
     <div class="field">
-      <label class="label">Residue %</label>
-      <input class="input"
-        id="residue"
-        name="residue"
-        required
-        inputmode="decimal"
-        pattern="[0-9]*\.?[0-9]*"
-        autocomplete="off"
-        onbeforeinput="if(event.data && !event.data.match(/^[0-9.]$/)) event.preventDefault();"
-        onkeypress="return /[0-9.]/.test(event.key);"
-        onpaste="return false;"
-        oninput="this.value=this.value.replace(/[^0-9.]/g,'');">
+      <label class="label">Residue % *</label>
+      <input class="input" type="number" step="0.01" inputmode="decimal"
+        name="residue" id="residue" required oninput="checkForm()">
     </div>
 
-    <button id="submitBtn" class="button is-link is-fullwidth" disabled>Submit Breakage</button>
+    <!-- PHOTO -->
+    <div class="field">
+      <label class="label">Photo (optional)</label>
+      <input class="input" type="file" name="photo" accept="image/*">
+    </div>
+
+    <!-- REMARKS -->
+    <div class="field">
+      <label class="label">Remarks (optional)</label>
+      <textarea class="textarea" name="remarks"></textarea>
+    </div>
+
+    <!-- SUBMIT -->
+    <button class="button is-primary is-fullwidth mt-4"
+      id="submitBtn" disabled>
+      Submit Breakage Analysis
+    </button>
 
   </form>
 </div>
 
 <script>
-function enable() {
-  const ok =
-    document.getElementById("lineInput").value &&
-    document.getElementById("productSelect").value &&
-    document.getElementById("good").value &&
-    document.getElementById("broken").value &&
-    document.getElementById("cluster").value &&
-    document.getElementById("residue").value;
-
-  document.getElementById("submitBtn").disabled = !ok;
+function setValue(field, value, btn){
+  document.getElementById(field).value = value;
+  btn.parentElement.querySelectorAll('.button').forEach(b=>{
+    b.classList.remove('is-selected');
+  });
+  btn.classList.add('is-selected');
+  checkForm();
 }
 
-["productSelect","good","broken","cluster","residue"].forEach(id=>{
-  document.getElementById(id).oninput = enable;
-});
-
-document.querySelectorAll(".lineBtn").forEach(btn=>{
-  btn.onclick = ()=>{
-    document.getElementById("lineInput").value = btn.dataset.line;
-    document.querySelectorAll('.lineBtn').forEach(x=>x.classList.remove("button-active"));
-    btn.classList.add("button-active");
-    enable();
-  };
-});
+function checkForm(){
+  const required = [
+    'line','product_code',
+    'good','broken','cluster','residue'
+  ];
+  const ok = required.every(id => document.getElementById(id).value);
+  document.getElementById('submitBtn').disabled = !ok;
+}
 </script>
 
 {% endblock %}
-
-<button class="button is-light" onclick="history.back()" style="margin-bottom:15px;">
-  ← Back
-</button>
