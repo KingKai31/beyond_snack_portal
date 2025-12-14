@@ -4,40 +4,24 @@
 <style>
   .login-box {
     max-width: 420px;
-    margin: auto;
+    margin: 40px auto;
     background: #ffffff;
     padding: 26px;
-    border-radius: 16px;
-    box-shadow: 0 10px 28px rgba(0,0,0,0.08);
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
   }
 
   .login-title {
     text-align: center;
     margin-bottom: 20px;
   }
-
-  .login-title h1 {
-    font-size: 1.6rem;
-    margin-bottom: 6px;
-  }
-
-  .login-title p {
-    color: #666;
-    font-size: 0.95rem;
-  }
-
-  .button {
-    font-size: 1.1rem;
-    height: 48px;
-  }
 </style>
 
 <div class="login-box">
-
-  <div class="login-title">
-    <h1>🔐 Login</h1>
-    <p>Beyond Snack Production Portal</p>
-  </div>
+  <h1 class="title login-title">🔐 Login</h1>
+  <p class="has-text-centered mb-4" style="color:#666;">
+    Beyond Snack Production Portal
+  </p>
 
   <form method="POST">
 
@@ -45,13 +29,7 @@
     <div class="field">
       <label class="label">Email</label>
       <div class="control has-icons-left">
-        <input
-          class="input"
-          type="email"
-          name="email"
-          placeholder="example@drjackfruit.com"
-          required
-        >
+        <input class="input" type="email" name="email" required>
         <span class="icon is-left">
           <i class="mdi mdi-email-outline"></i>
         </span>
@@ -62,28 +40,19 @@
     <div class="field">
       <label class="label">Password</label>
       <div class="control has-icons-left">
-        <input
-          class="input"
-          type="password"
-          name="password"
-          placeholder="Enter password"
-          required
-        >
+        <input class="input" type="password" name="password" required>
         <span class="icon is-left">
           <i class="mdi mdi-lock-outline"></i>
         </span>
       </div>
     </div>
 
-    <!-- SUBMIT -->
-    <div class="field mt-4">
-      <button class="button is-primary is-fullwidth">
-        Login
-      </button>
-    </div>
+    <!-- LOGIN BUTTON -->
+    <button class="button is-primary is-fullwidth mt-4">
+      Login
+    </button>
 
   </form>
-
 </div>
 
 {% endblock %}
