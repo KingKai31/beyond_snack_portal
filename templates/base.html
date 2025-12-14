@@ -13,6 +13,9 @@
   <!-- ICONS -->
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.3.67/css/materialdesignicons.min.css" rel="stylesheet">
 
+  <!-- CHARTS -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     body {
       background: #f4f6fb;
@@ -30,6 +33,7 @@
 
     .logo {
       height: 56px;
+      max-width: 100%;
     }
 
     .box, .card {
@@ -42,6 +46,10 @@
       height: 48px;
     }
 
+    textarea {
+      height: auto;
+    }
+
     .button {
       font-size: 1.15rem;
       padding: 14px 16px;
@@ -51,22 +59,45 @@
     .section {
       padding: 1rem;
     }
-  </style>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    /* Back button */
+    .back-btn {
+      margin-bottom: 12px;
+    }
+  </style>
 </head>
 
 <body>
 
 <nav class="navbar has-shadow is-white">
-  <div class="navbar-brand" style="display:flex;align-items:center;padding-left:12px;">
-    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
-    <strong style="margin-left:10px;">Beyond Snack Portal</strong>
+  <div class="navbar-brand" style="display:flex;align-items:center;gap:12px;">
+    
+    <!-- BACK BUTTON (only if not on index) -->
+    {% if request.path != '/index' and request.path != '/' %}
+      <button class="button is-light back-btn"
+              onclick="window.history.back()">
+        <span class="icon">
+          <i class="mdi mdi-arrow-left"></i>
+        </span>
+      </button>
+    {% endif %}
+
+    <!-- LOGO + TITLE -->
+    <a href="/index" style="display:flex;align-items:center;text-decoration:none;">
+      <img src="{{ url_for('static', filename='logo.png') }}"
+           class="logo"
+           alt="Beyond Snack Logo"
+           onerror="this.style.display='none'">
+      <strong style="margin-left:10px;color:#000;">
+        Beyond Snack Portal
+      </strong>
+    </a>
   </div>
 </nav>
 
 <section class="section">
   <div class="container">
+
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for cat, msg in messages %}
@@ -76,6 +107,7 @@
         {% endfor %}
       {% endif %}
     {% endwith %}
+
     {% block content %}{% endblock %}
   </div>
 </section>
