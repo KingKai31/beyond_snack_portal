@@ -1,40 +1,82 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>Beyond Snack Portal</title>
-    <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="utf-8">
+  <title>Beyond Snack — Production Portal</title>
+
+  <!-- MOBILE FIRST -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- BULMA CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
+
+  <!-- ICONS -->
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.3.67/css/materialdesignicons.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: #f4f6fb;
+      font-size: 1.1rem;
+    }
+
+    .container {
+      max-width: 100%;
+      padding: 16px;
+    }
+
+    .navbar {
+      padding: 12px;
+    }
+
+    .logo {
+      height: 56px;
+    }
+
+    .box, .card {
+      border-radius: 14px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    }
+
+    input, select, textarea {
+      font-size: 1.15rem;
+      height: 48px;
+    }
+
+    .button {
+      font-size: 1.15rem;
+      padding: 14px 16px;
+      border-radius: 12px;
+    }
+
+    .section {
+      padding: 1rem;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
 
 <nav class="navbar has-shadow is-white">
-  <div class="navbar-brand" style="display:flex;align-items:center;padding-left:15px;">
-    <a class="navbar-item" href="{{ url_for('index') }}">
-      <img src="{{ url_for('static', filename='logo.png') }}" style="height:48px;margin-right:10px;">
-    </a>
-    <span class="navbar-item"><strong>Beyond Snack Portal</strong></span>
-  </div>
-
-  <div class="navbar-end" style="padding-right:20px;">
-    {% if session.get('role') %}
-      <div class="navbar-item"><a class="button is-light" href="{{ url_for('logout') }}">Logout</a></div>
-    {% endif %}
+  <div class="navbar-brand" style="display:flex;align-items:center;padding-left:12px;">
+    <img src="{{ url_for('static', filename='logo.png') }}" class="logo">
+    <strong style="margin-left:10px;">Beyond Snack Portal</strong>
   </div>
 </nav>
 
 <section class="section">
   <div class="container">
-
-    {% if request.path != '/index' and request.path != '/login' %}
-    <div style="margin-bottom: 15px;">
-      <button class="button is-light" onclick="history.back()">← Back</button>
-    </div>
-    {% endif %}
-
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat, msg in messages %}
+          <div class="notification is-{{ 'success' if cat=='success' else 'danger' }}">
+            {{ msg }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
     {% block content %}{% endblock %}
-
   </div>
 </section>
 
