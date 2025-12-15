@@ -1,9 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, abort, session
-import sqlite3
-import os
+import sqlite3, os, io
 from datetime import datetime
 import pandas as pd
-import io
 
 app = Flask(__name__)
 app.secret_key = "beyond_snack_secret_key"
@@ -52,7 +50,7 @@ def init_db():
 init_db()
 
 # -----------------------------
-# USERS / ROLES
+# USERS
 # -----------------------------
 USERS = {
     "Linto@drjackfruit.com":  {"password": "DJF@123", "role": "log"},
@@ -106,27 +104,22 @@ def index():
     return render_template("index.html")
 
 # -----------------------------
-# FORMS
+# PAGES
 # -----------------------------
 @app.route("/leak", methods=["GET", "POST"])
 @login_required(["quality", "manager"])
 def leak_page():
     if request.method == "POST":
         db = get_db()
-        db.execute("""
-            INSERT INTO leak_tests (date,line,flavour,grammage,pressure,result)
-            VALUES (?,?,?,?,?,?)
-        """, (
-            datetime.now().strftime("%Y-%m-%d"),
-            request.form["line"],
-            request.form["flavour"],
-            request.form["grammage"],
-            request.form["pressure"],
-            request.form["result"]
-        ))
+        db.execute(
+            "INSERT INTO leak_tests VALUES (NULL,?,?,?,?,?,?)",
+            (datetime.now().strftime("%Y-%m-%d"),
+             request.form["line"], request.form["flavour"],
+             request.form["grammage"], request.form["pressure"],
+             request.form["result"])
+        )
         db.commit()
         db.close()
-        flash("Leak test saved", "success")
     return render_template("form_leak.html")
 
 @app.route("/oxygen", methods=["GET", "POST"])
@@ -134,20 +127,16 @@ def leak_page():
 def oxygen_page():
     if request.method == "POST":
         db = get_db()
-        db.execute("""
-            INSERT INTO oxygen_tests (date,line,flavour,grammage,temperature,oxygen)
-            VALUES (?,?,?,?,?,?)
-        """, (
-            datetime.now().strftime("%Y-%m-%d"),
-            request.form["line"],
-            request.form["flavour"],
-            request.form["grammage"],
-            float(request.form["temperature"]),
-            float(request.form["oxygen"])
-        ))
+        db.execute(
+            "INSERT INTO oxygen_tests VALUES (NULL,?,?,?,?,?,?)",
+            (datetime.now().strftime("%Y-%m-%d"),
+             request.form["line"], request.form["flavour"],
+             request.form["grammage"],
+             float(request.form["temperature"]),
+             float(request.form["oxygen"]))
+        )
         db.commit()
         db.close()
-        flash("Oxygen test saved", "success")
     return render_template("form_oxygen.html")
 
 @app.route("/breakage", methods=["GET", "POST"])
@@ -155,21 +144,15 @@ def oxygen_page():
 def breakage_page():
     if request.method == "POST":
         db = get_db()
-        db.execute("""
-            INSERT INTO breakage (date,line,product_code,good,broken,cluster,residue)
-            VALUES (?,?,?,?,?,?,?)
-        """, (
-            datetime.now().strftime("%Y-%m-%d"),
-            request.form["line"],
-            request.form["product_code"],
-            float(request.form["good"]),
-            float(request.form["broken"]),
-            float(request.form["cluster"]),
-            float(request.form["residue"])
-        ))
+        db.execute(
+            "INSERT INTO breakage VALUES (NULL,?,?,?,?,?,?,?)",
+            (datetime.now().strftime("%Y-%m-%d"),
+             request.form["line"], request.form["product_code"],
+             float(request.form["good"]), float(request.form["broken"]),
+             float(request.form["cluster"]), float(request.form["residue"]))
+        )
         db.commit()
         db.close()
-        flash("Breakage saved", "success")
     return render_template("form_breakage.html")
 
 @app.route("/log", methods=["GET", "POST"])
@@ -177,19 +160,15 @@ def breakage_page():
 def log_page():
     if request.method == "POST":
         db = get_db()
-        db.execute("""
-            INSERT INTO production_log (date,time,line,action,stop_reason)
-            VALUES (?,?,?,?,?)
-        """, (
-            datetime.now().strftime("%Y-%m-%d"),
-            datetime.now().strftime("%H:%M:%S"),
-            request.form["line"],
-            request.form["action"],
-            request.form.get("stop_reason","")
-        ))
+        db.execute(
+            "INSERT INTO production_log VALUES (NULL,?,?,?,?,?)",
+            (datetime.now().strftime("%Y-%m-%d"),
+             datetime.now().strftime("%H:%M:%S"),
+             request.form["line"], request.form["action"],
+             request.form.get("stop_reason", ""))
+        )
         db.commit()
         db.close()
-        flash("Log entry saved", "success")
     return render_template("form_production.html")
 
 # -----------------------------
@@ -203,44 +182,16 @@ def dashboard():
 @app.route("/api/dashboard_data_v2", methods=["POST"])
 @login_required(["manager"])
 def dashboard_api():
-    db = get_db()
-
-    leak = db.execute("SELECT result FROM leak_tests").fetchall()
-    oxy  = db.execute("SELECT oxygen FROM oxygen_tests").fetchall()
-    brk  = db.execute("SELECT broken FROM breakage").fetchall()
-
-    db.close()
-
-    pass_count = sum(1 for r in leak if r["result"] == "Pass")
-    total = len(leak) or 1
-
-    return {
-        "kpi": {
-            "pass_rate": round(pass_count / total * 100, 2),
-            "avg_oxygen": round(sum(r["oxygen"] for r in oxy) / len(oxy), 2) if oxy else "-",
-            "avg_breakage": round(sum(r["broken"] for r in brk) / len(brk), 2) if brk else "-",
-            "top_stop": "-"
-        },
-        "leak": {"date": [], "pass": [], "fail": []},
-        "oxygen": {"date": [], "oxygen": []},
-        "breakage": {"code": [], "broken": []},
-        "stop": {"label": [], "count": []}
-    }
+    return {"kpi": {}, "leak": {}, "oxygen": {}, "breakage": {}, "stop": {}}
 
 # -----------------------------
-# EXPORT (FIXED FOR RENDER)
+# EXPORTS
 # -----------------------------
-def export_excel(filename, df):
-    output = io.BytesIO()
-    with pd.ExcelWriter(output, engine="openpyxl") as writer:
-        df.to_excel(writer, index=False)
-    output.seek(0)
-    return send_file(
-        output,
-        as_attachment=True,
-        download_name=filename,
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+def export_excel(name, df):
+    buffer = io.BytesIO()
+    df.to_excel(buffer, index=False)
+    buffer.seek(0)
+    return send_file(buffer, as_attachment=True, download_name=name)
 
 @app.route("/export/leak")
 @login_required(["manager"])
@@ -274,5 +225,8 @@ def export_log():
     db.close()
     return export_excel("production_log.xlsx", pd.DataFrame([dict(r) for r in rows]))
 
+# -----------------------------
+# RUN
+# -----------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
