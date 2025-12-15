@@ -6,22 +6,30 @@
     max-width: 420px;
     margin: 40px auto;
     background: #ffffff;
-    padding: 26px;
-    border-radius: 14px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    padding: 28px;
+    border-radius: 16px;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.10);
   }
 
   .login-title {
     text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .login-sub {
+    text-align: center;
+    color: #666;
+    font-size: 0.95rem;
     margin-bottom: 20px;
   }
 </style>
 
 <div class="login-box">
+
   <h1 class="title login-title">🔐 Login</h1>
-  <p class="has-text-centered mb-4" style="color:#666;">
+  <div class="login-sub">
     Beyond Snack Production Portal
-  </p>
+  </div>
 
   <form method="POST">
 
@@ -29,7 +37,13 @@
     <div class="field">
       <label class="label">User ID</label>
       <div class="control has-icons-left">
-        <input class="input" type="text" name="id" placeholder="Enter your ID" required>
+        <input
+          class="input"
+          type="email"
+          name="email"
+          placeholder="example@drjackfruit.com"
+          required
+        >
         <span class="icon is-left">
           <i class="mdi mdi-account-outline"></i>
         </span>
@@ -40,7 +54,13 @@
     <div class="field">
       <label class="label">Password</label>
       <div class="control has-icons-left">
-        <input class="input" type="password" name="password" required>
+        <input
+          class="input"
+          type="password"
+          name="password"
+          placeholder="Enter password"
+          required
+        >
         <span class="icon is-left">
           <i class="mdi mdi-lock-outline"></i>
         </span>
@@ -49,10 +69,11 @@
 
     <!-- LOGIN BUTTON -->
     <button class="button is-primary is-fullwidth mt-4">
-      Login
+      <span class="mdi mdi-login"></span>&nbsp; Login
     </button>
 
   </form>
+
 </div>
 
 {% endblock %}
