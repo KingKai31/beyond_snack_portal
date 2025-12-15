@@ -92,7 +92,7 @@ init_db()
 def login_required(roles=None):
     def decorator(fn):
         def wrapper(*args, **kwargs):
-            if "email" -> not in session:
+            if "user_id" not in session:
                 return redirect(url_for("login"))
             if roles and session.get("role") not in roles:
                 abort(403)
@@ -108,14 +108,14 @@ def login_required(roles=None):
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = request.form["email"]
+        user_id = request.form["id"]
         password = request.form["password"]
 
-        user = USERS.get(email)
+        user = USERS.get(user_id)
         if user and user["password"] == password:
-            session["email"] = email
-            session["role"] = user["role"]
-            return redirect(url_for("index"))
+           session["user_id"] = user_id
+           session["role"] = user["role"]
+           return redirect(url_for("index"))
 
         flash("Invalid login", "danger")
 
@@ -284,3 +284,4 @@ def server_error(e):
 # --------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
+
