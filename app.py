@@ -3,6 +3,7 @@ import sqlite3
 import os
 from datetime import datetime
 import pandas as pd
+import io
 
 app = Flask(__name__)
 app.secret_key = "beyond_snack_secret_key"
@@ -261,8 +262,17 @@ def reports():
 # EXPORT HELPERS
 # -----------------------------
 def export_excel(filename, df):
-    df.to_excel(filename, index=False)
-    return send_file(filename, as_attachment=True)
+    output = io.BytesIO()
+    df.to_excel(output, index=False)
+    output.seek(0)
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name=filename,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
 
 @app.route("/export/leak")
 @login_required(["manager"])
@@ -301,3 +311,4 @@ def export_log():
 # -----------------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080)
+
