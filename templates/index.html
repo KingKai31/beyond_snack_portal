@@ -16,9 +16,9 @@
     gap: 16px;
     padding: 18px;
     background: #ffffff;
-    border-radius: 14px;
+    border-radius: 16px;
     box-shadow: 0 8px 22px rgba(0,0,0,0.08);
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 500;
     color: #363636;
     text-decoration: none;
@@ -37,19 +37,13 @@
     flex-grow: 1;
   }
 
-  /* Manager cards */
-  .manager-dashboard {
-    background: linear-gradient(135deg, #3273dc, #5a9bff);
+  /* MANAGER SPECIAL */
+  .manager {
+    background: linear-gradient(135deg, #ff3860, #ff7a7a);
     color: #ffffff;
   }
 
-  .manager-reports {
-    background: linear-gradient(135deg, #23d160, #48c774);
-    color: #ffffff;
-  }
-
-  .manager-dashboard .menu-icon,
-  .manager-reports .menu-icon {
+  .manager .menu-icon {
     color: #ffffff;
   }
 </style>
@@ -60,14 +54,14 @@
 
   <!-- LOG ENTRY (Log + Manager) -->
   {% if session.get("role") in ["log", "manager"] %}
-  <a href="{{ url_for('log_page') }}" class="menu-card">
+  <a href="{{ url_for('log') }}" class="menu-card">
     <span class="mdi mdi-clock-outline menu-icon"></span>
-    <span class="menu-text">Log Entry</span>
+    <span class="menu-text">Production Log</span>
     <span class="mdi mdi-chevron-right"></span>
   </a>
   {% endif %}
 
-  <!-- QUALITY PAGES (Quality + Manager) -->
+  <!-- QUALITY PAGES (QC + Manager) -->
   {% if session.get("role") in ["quality", "manager"] %}
 
   <a href="{{ url_for('leak_page') }}" class="menu-card">
@@ -93,14 +87,14 @@
   <!-- MANAGER ONLY -->
   {% if session.get("role") == "manager" %}
 
-  <a href="{{ url_for('dashboard') }}" class="menu-card manager-dashboard">
+  <a href="{{ url_for('dashboard') }}" class="menu-card manager">
     <span class="mdi mdi-view-dashboard menu-icon"></span>
     <span class="menu-text">Dashboard</span>
     <span class="mdi mdi-chevron-right"></span>
   </a>
 
-  <a href="{{ url_for('reports') }}" class="menu-card manager-reports">
-    <span class="mdi mdi-file-excel menu-icon"></span>
+  <a href="{{ url_for('reports') }}" class="menu-card manager">
+    <span class="mdi mdi-file-excel-outline menu-icon"></span>
     <span class="menu-text">Reports & Downloads</span>
     <span class="mdi mdi-chevron-right"></span>
   </a>
