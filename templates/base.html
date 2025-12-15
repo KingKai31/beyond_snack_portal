@@ -13,7 +13,7 @@
   <!-- MATERIAL ICONS -->
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.3.67/css/materialdesignicons.min.css" rel="stylesheet">
 
-  <!-- CHART.JS -->
+  <!-- CHART.JS (for dashboard) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -24,18 +24,10 @@
 
     .navbar {
       padding: 12px;
-      background: #ffffff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-
-    .navbar-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
     }
 
     .logo {
-      height: 46px;
+      height: 52px;
     }
 
     .container {
@@ -43,36 +35,44 @@
       padding: 16px;
     }
 
-    .section {
-      padding: 1rem 0.75rem;
+    .box, .card {
+      border-radius: 14px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
     }
 
-    input,
-    select,
-    textarea {
+    input, select, textarea {
       font-size: 1.05rem;
     }
 
     .button {
       font-size: 1.05rem;
-      border-radius: 10px;
+      border-radius: 12px;
     }
 
-    .notification {
-      border-radius: 12px;
+    /* BACK BUTTON */
+    .back-btn {
+      margin-bottom: 12px;
+    }
+
+    /* MOBILE FIX */
+    @media (max-width: 768px) {
+      body {
+        font-size: 1.1rem;
+      }
     }
   </style>
 </head>
 
 <body>
 
-<nav class="navbar">
-  <div class="navbar-brand">
+<!-- TOP NAVBAR -->
+<nav class="navbar is-white has-shadow">
+  <div class="navbar-brand" style="display:flex;align-items:center;">
     <img src="{{ url_for('static', filename='logo.png') }}" class="logo" alt="Beyond Snack">
-    <strong>Beyond Snack Portal</strong>
+    <strong style="margin-left:10px;">Beyond Snack Portal</strong>
   </div>
 
-  {% if session.get("email") %}
+  {% if session.get("user") %}
   <div class="navbar-end">
     <div class="navbar-item">
       <a href="{{ url_for('logout') }}" class="button is-light">
@@ -83,8 +83,16 @@
   {% endif %}
 </nav>
 
+<!-- MAIN CONTENT -->
 <section class="section">
   <div class="container">
+
+    <!-- BACK BUTTON -->
+    {% if request.endpoint not in ['index', 'login'] %}
+    <a onclick="history.back()" class="button is-light back-btn">
+      <span class="mdi mdi-arrow-left"></span>&nbsp; Back
+    </a>
+    {% endif %}
 
     <!-- FLASH MESSAGES -->
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -97,7 +105,6 @@
       {% endif %}
     {% endwith %}
 
-    <!-- PAGE CONTENT -->
     {% block content %}{% endblock %}
 
   </div>
