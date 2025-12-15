@@ -66,7 +66,7 @@ def login_required(roles=None):
         def wrapper(*args, **kwargs):
             if "user" not in session:
                 return redirect(url_for("login"))
-            if roles and session["role"] not in roles:
+            if roles and session.get("role") not in roles:
                 abort(403)
             return fn(*args, **kwargs)
         wrapper.__name__ = fn.__name__
@@ -80,8 +80,8 @@ def login_required(roles=None):
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email = request.form["email"]
-        password = request.form["password"]
+        email = request.form.get("email")
+        password = request.form.get("password")
 
         user = USERS.get(email)
         if user and user["password"] == password:
@@ -90,6 +90,7 @@ def login():
             return redirect(url_for("index"))
 
         flash("Invalid login", "danger")
+
     return render_template("login.html")
 
 @app.route("/logout")
@@ -119,15 +120,16 @@ def leak_page():
             VALUES (?,?,?,?,?,?)
         """, (
             datetime.now().strftime("%Y-%m-%d"),
-            request.form["line"],
-            request.form["flavour"],
-            request.form["grammage"],
-            request.form["pressure"],
-            request.form["result"]
+            request.form.get("line"),
+            request.form.get("flavour"),
+            request.form.get("grammage"),
+            request.form.get("pressure"),
+            request.form.get("result")
         ))
         db.commit()
         db.close()
         flash("Leak test saved", "success")
+
     return render_template("form_leak.html")
 
 # -----------------------------
@@ -144,15 +146,16 @@ def oxygen_page():
             VALUES (?,?,?,?,?,?)
         """, (
             datetime.now().strftime("%Y-%m-%d"),
-            request.form["line"],
-            request.form["flavour"],
-            request.form["grammage"],
-            float(request.form["temperature"]),
-            float(request.form["oxygen"])
+            request.form.get("line"),
+            request.form.get("flavour"),
+            request.form.get("grammage"),
+            float(request.form.get("temperature")),
+            float(request.form.get("oxygen"))
         ))
         db.commit()
         db.close()
         flash("Oxygen test saved", "success")
+
     return render_template("form_oxygen.html")
 
 # -----------------------------
@@ -169,16 +172,17 @@ def breakage_page():
             VALUES (?,?,?,?,?,?,?)
         """, (
             datetime.now().strftime("%Y-%m-%d"),
-            request.form["line"],
-            request.form["product_code"],
-            float(request.form["good"]),
-            float(request.form["broken"]),
-            float(request.form["cluster"]),
-            float(request.form["residue"])
+            request.form.get("line"),
+            request.form.get("product_code"),
+            float(request.form.get("good")),
+            float(request.form.get("broken")),
+            float(request.form.get("cluster")),
+            float(request.form.get("residue"))
         ))
         db.commit()
         db.close()
         flash("Breakage saved", "success")
+
     return render_template("form_breakage.html")
 
 # -----------------------------
@@ -196,13 +200,14 @@ def log_page():
         """, (
             datetime.now().strftime("%Y-%m-%d"),
             datetime.now().strftime("%H:%M:%S"),
-            request.form["line"],
-            request.form["action"],
+            request.form.get("line"),
+            request.form.get("action"),
             request.form.get("stop_reason", "")
         ))
         db.commit()
         db.close()
         flash("Log entry saved", "success")
+
     return render_template("form_production.html")
 
 # -----------------------------
@@ -214,6 +219,37 @@ def dashboard():
     return render_template("dashboard.html")
 
 # -----------------------------
+# DASHBOARD API (THIS WAS MISSING)
+# -----------------------------
+@app.route("/api/dashboard_data_v2", methods=["POST"])
+@login_required(["manager"])
+def dashboard_api():
+    db = get_db()
+
+    leak = db.execute("SELECT result FROM leak_tests").fetchall()
+    oxy = db.execute("SELECT oxygen FROM oxygen_tests").fetchall()
+    brk = db.execute("SELECT broken FROM breakage").fetchall()
+    stop = db.execute("SELECT stop_reason FROM production_log WHERE action='STOP'").fetchall()
+
+    db.close()
+
+    pass_count = sum(1 for r in leak if r["result"] == "Pass")
+    total = len(leak) if leak else 1
+
+    return {
+        "kpi": {
+            "pass_rate": round(pass_count / total * 100, 2),
+            "avg_oxygen": round(sum(r["oxygen"] for r in oxy) / len(oxy), 2) if oxy else "-",
+            "avg_breakage": round(sum(r["broken"] for r in brk) / len(brk), 2) if brk else "-",
+            "top_stop": stop[0]["stop_reason"] if stop else "-"
+        },
+        "leak": {"date": [], "pass": [], "fail": []},
+        "oxygen": {"date": [], "oxygen": []},
+        "breakage": {"code": [], "broken": []},
+        "stop": {"label": [], "count": []}
+    }
+
+# -----------------------------
 # REPORTS PAGE
 # -----------------------------
 @app.route("/reports")
@@ -222,22 +258,17 @@ def reports():
     return render_template("reports.html")
 
 # -----------------------------
-# EXPORT HELP
+# EXPORT HELPERS
 # -----------------------------
 def export_excel(filename, df):
     df.to_excel(filename, index=False)
-    return send_file(
-        filename,
-        as_attachment=True,
-        download_name=filename,
-        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+    return send_file(filename, as_attachment=True)
 
 @app.route("/export/leak")
 @login_required(["manager"])
 def export_leak():
     db = get_db()
-    rows = db.execute("SELECT date,line,flavour,grammage,pressure,result FROM leak_tests").fetchall()
+    rows = db.execute("SELECT * FROM leak_tests").fetchall()
     db.close()
     return export_excel("leak_tests.xlsx", pd.DataFrame([dict(r) for r in rows]))
 
@@ -245,7 +276,7 @@ def export_leak():
 @login_required(["manager"])
 def export_oxygen():
     db = get_db()
-    rows = db.execute("SELECT date,line,flavour,grammage,temperature,oxygen FROM oxygen_tests").fetchall()
+    rows = db.execute("SELECT * FROM oxygen_tests").fetchall()
     db.close()
     return export_excel("oxygen_tests.xlsx", pd.DataFrame([dict(r) for r in rows]))
 
@@ -261,7 +292,7 @@ def export_breakage():
 @login_required(["manager"])
 def export_log():
     db = get_db()
-    rows = db.execute("SELECT date,time,line,action,stop_reason FROM production_log").fetchall()
+    rows = db.execute("SELECT * FROM production_log").fetchall()
     db.close()
     return export_excel("production_log.xlsx", pd.DataFrame([dict(r) for r in rows]))
 
