@@ -7,8 +7,8 @@
     margin: auto;
     background: #ffffff;
     padding: 22px;
-    border-radius: 14px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    border-radius: 16px;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.10);
   }
 
   .btn-group {
@@ -23,7 +23,7 @@
 
   .button.is-selected {
     background-color: #3273dc;
-    color: #ffffff;
+    color: #fff;
   }
 </style>
 
@@ -37,9 +37,9 @@
       <label class="label">Line *</label>
       <div class="btn-group">
         <button type="button" class="button is-light"
-          onclick="setValue('line','Line 1',this)">Line 1</button>
+                onclick="setBtnValue('line','Line 1',this)">Line 1</button>
         <button type="button" class="button is-light"
-          onclick="setValue('line','Line 2',this)">Line 2</button>
+                onclick="setBtnValue('line','Line 2',this)">Line 2</button>
       </div>
       <input type="hidden" name="line" id="line" required>
     </div>
@@ -47,57 +47,68 @@
     <!-- PRODUCT CODE -->
     <div class="field">
       <label class="label">Product Code *</label>
-      <div class="select is-fullwidth">
-        <select name="product_code" id="product_code" required onchange="checkForm()">
-          <option value="">Select product code</option>
-          <option>OS10G</option><option>PP10G</option><option>CO10G</option><option>SP10G</option>
-          <option>DM10G</option><option>HS10G</option>
-          <option>OS25G</option><option>PP25G</option><option>CO25G</option><option>SP25G</option>
-          <option>OS26G</option><option>PP26G</option><option>CO26G</option><option>SP26G</option>
-          <option>DM26G</option><option>HS26G</option>
-          <option>OS48G</option><option>PP48G</option><option>CO48G</option><option>SP48G</option>
-          <option>DM48G</option><option>HS48G</option>
-          <option>OS75G</option><option>PP75G</option><option>CO75G</option><option>SP75G</option>
-          <option>DM75G</option><option>HS75G</option>
-          <option>OS100G</option><option>PP100G</option><option>CO100G</option><option>SP100G</option>
-          <option>DM100G</option><option>HS100G</option>
-          <option>OS150G</option><option>PP150G</option><option>CO150G</option><option>SP150G</option>
-          <option>DM150G</option><option>HS150G</option>
-          <option>CPOSPPCO300G</option>
-          <option>CPOSPPCO600G</option>
-        </select>
-      </div>
+      <input class="input"
+             type="text"
+             name="product_code"
+             id="product_code"
+             placeholder="Enter product code"
+             required
+             oninput="checkForm()">
     </div>
 
-    <!-- GOOD % -->
+    <!-- GOOD -->
     <div class="field">
-      <label class="label">Good Chips % *</label>
-      <input class="input" type="number" step="0.01" inputmode="decimal"
-        name="good" id="good" required oninput="checkForm()">
+      <label class="label">Good (%) *</label>
+      <input class="input"
+             type="number"
+             step="0.01"
+             inputmode="decimal"
+             name="good"
+             id="good"
+             required
+             oninput="sanitizeNumber(this); checkForm();">
     </div>
 
-    <!-- BROKEN % -->
+    <!-- BROKEN -->
     <div class="field">
-      <label class="label">Broken Chips % *</label>
-      <input class="input" type="number" step="0.01" inputmode="decimal"
-        name="broken" id="broken" required oninput="checkForm()">
+      <label class="label">Broken (%) *</label>
+      <input class="input"
+             type="number"
+             step="0.01"
+             inputmode="decimal"
+             name="broken"
+             id="broken"
+             required
+             oninput="sanitizeNumber(this); checkForm();">
     </div>
 
-    <!-- CLUSTER % -->
+    <!-- CLUSTER -->
     <div class="field">
-      <label class="label">Cluster % *</label>
-      <input class="input" type="number" step="0.01" inputmode="decimal"
-        name="cluster" id="cluster" required oninput="checkForm()">
+      <label class="label">Cluster (%) *</label>
+      <input class="input"
+             type="number"
+             step="0.01"
+             inputmode="decimal"
+             name="cluster"
+             id="cluster"
+             required
+             oninput="sanitizeNumber(this); checkForm();">
     </div>
 
-    <!-- RESIDUE % -->
+    <!-- RESIDUE -->
     <div class="field">
-      <label class="label">Residue % *</label>
-      <input class="input" type="number" step="0.01" inputmode="decimal"
-        name="residue" id="residue" required oninput="checkForm()">
+      <label class="label">Residue (%) *</label>
+      <input class="input"
+             type="number"
+             step="0.01"
+             inputmode="decimal"
+             name="residue"
+             id="residue"
+             required
+             oninput="sanitizeNumber(this); checkForm();">
     </div>
 
-    <!-- PHOTO -->
+    <!-- PHOTO (OPTIONAL) -->
     <div class="field">
       <label class="label">Photo (optional)</label>
       <input class="input" type="file" name="photo" accept="image/*">
@@ -106,12 +117,14 @@
     <!-- REMARKS -->
     <div class="field">
       <label class="label">Remarks (optional)</label>
-      <textarea class="textarea" name="remarks"></textarea>
+      <textarea class="textarea"
+                name="remarks"
+                placeholder="Optional remarks"></textarea>
     </div>
 
     <!-- SUBMIT -->
     <button class="button is-primary is-fullwidth mt-4"
-      id="submitBtn" disabled>
+            id="submitBtn" disabled>
       Submit Breakage Analysis
     </button>
 
@@ -119,21 +132,35 @@
 </div>
 
 <script>
-function setValue(field, value, btn){
+function setBtnValue(field, value, btn){
   document.getElementById(field).value = value;
-  btn.parentElement.querySelectorAll('.button').forEach(b=>{
+
+  btn.parentElement.querySelectorAll('.button').forEach(b => {
     b.classList.remove('is-selected');
   });
   btn.classList.add('is-selected');
+
   checkForm();
+}
+
+/* Only digits + one decimal allowed */
+function sanitizeNumber(input){
+  let v = input.value;
+  v = v.replace(/[^0-9.]/g, '');
+  const parts = v.split('.');
+  if (parts.length > 2) {
+    v = parts[0] + '.' + parts.slice(1).join('');
+  }
+  input.value = v;
 }
 
 function checkForm(){
   const required = [
-    'line','product_code',
-    'good','broken','cluster','residue'
+    'line','product_code','good','broken','cluster','residue'
   ];
-  const ok = required.every(id => document.getElementById(id).value);
+  const ok = required.every(id =>
+    document.getElementById(id).value
+  );
   document.getElementById('submitBtn').disabled = !ok;
 }
 </script>
