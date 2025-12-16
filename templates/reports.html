@@ -1,50 +1,83 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Beyond Snack Portal</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+{% extends "base.html" %}
+{% block content %}
 
-  <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/@mdi/font/css/materialdesignicons.min.css" rel="stylesheet">
-</head>
+<style>
+  .reports-container {
+    max-width: 520px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
 
-<body>
+  .report-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+    text-decoration: none;
+    color: #363636;
+    font-size: 1.05rem;
+    font-weight: 500;
+  }
 
-<nav class="navbar is-white has-shadow">
-  <div class="navbar-brand">
-    <div class="navbar-item">
-      <strong>Beyond Snack Portal</strong>
-    </div>
-  </div>
+  .report-card:hover {
+    background: #f0f4ff;
+  }
 
-  {% if session.get("user") %}
-  <div class="navbar-end">
-    <div class="navbar-item">
-      <a href="{{ url_for('logout') }}" class="button is-light">
-        Logout
-      </a>
-    </div>
-  </div>
-  {% endif %}
-</nav>
+  .report-icon {
+    font-size: 26px;
+    color: #3273dc;
+  }
 
-<section class="section">
-  <div class="container">
+  .report-text {
+    flex-grow: 1;
+  }
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for cat, msg in messages %}
-          <div class="notification is-{{ 'danger' if cat=='danger' else 'success' }}">
-            {{ msg }}
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+  .report-arrow {
+    font-size: 20px;
+    color: #999;
+  }
+</style>
 
-    {% block content %}{% endblock %}
-  </div>
-</section>
+<h1 class="title has-text-centered">📥 Reports & Downloads</h1>
+<p class="has-text-centered mb-4" style="color:#666;">
+  Download Excel reports
+</p>
 
-</body>
-</html>
+<div class="reports-container">
+
+  <!-- LEAK TEST -->
+  <a href="{{ url_for('export_leak') }}" class="report-card">
+    <span class="mdi mdi-shield-check report-icon"></span>
+    <span class="report-text">Leak Test Report</span>
+    <span class="mdi mdi-download report-arrow"></span>
+  </a>
+
+  <!-- OXYGEN TEST -->
+  <a href="{{ url_for('export_oxygen') }}" class="report-card">
+    <span class="mdi mdi-gas-cylinder report-icon"></span>
+    <span class="report-text">Oxygen Test Report</span>
+    <span class="mdi mdi-download report-arrow"></span>
+  </a>
+
+  <!-- BREAKAGE -->
+  <a href="{{ url_for('export_breakage') }}" class="report-card">
+    <span class="mdi mdi-chart-bar report-icon"></span>
+    <span class="report-text">Breakage Analysis Report</span>
+    <span class="mdi mdi-download report-arrow"></span>
+  </a>
+
+  <!-- PRODUCTION LOG -->
+  <a href="{{ url_for('export_log') }}" class="report-card">
+    <span class="mdi mdi-clock-outline report-icon"></span>
+    <span class="report-text">Production Log Report</span>
+    <span class="mdi mdi-download report-arrow"></span>
+  </a>
+
+</div>
+
+{% endblock %}
