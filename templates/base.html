@@ -2,103 +2,40 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Beyond Snack — Production Portal</title>
+  <title>Beyond Snack Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- MOBILE FIRST -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-
-  <!-- BULMA CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
-
-  <!-- MATERIAL ICONS -->
-  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.3.67/css/materialdesignicons.min.css" rel="stylesheet">
-
-  <!-- CHART.JS (for dashboard) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <style>
-    body {
-      background: #f4f6fb;
-      font-size: 1.05rem;
-    }
-
-    .navbar {
-      padding: 12px;
-    }
-
-    .logo {
-      height: 52px;
-    }
-
-    .container {
-      max-width: 100%;
-      padding: 16px;
-    }
-
-    .box, .card {
-      border-radius: 14px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
-    }
-
-    input, select, textarea {
-      font-size: 1.05rem;
-    }
-
-    .button {
-      font-size: 1.05rem;
-      border-radius: 12px;
-    }
-
-    /* BACK BUTTON */
-    .back-btn {
-      margin-bottom: 12px;
-    }
-
-    /* MOBILE FIX */
-    @media (max-width: 768px) {
-      body {
-        font-size: 1.1rem;
-      }
-    }
-  </style>
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font/css/materialdesignicons.min.css" rel="stylesheet">
 </head>
 
 <body>
 
-<!-- TOP NAVBAR -->
 <nav class="navbar is-white has-shadow">
-  <div class="navbar-brand" style="display:flex;align-items:center;">
-    <img src="{{ url_for('static', filename='logo.png') }}" class="logo" alt="Beyond Snack">
-    <strong style="margin-left:10px;">Beyond Snack Portal</strong>
+  <div class="navbar-brand">
+    <div class="navbar-item">
+      <strong>Beyond Snack Portal</strong>
+    </div>
   </div>
 
   {% if session.get("user") %}
   <div class="navbar-end">
     <div class="navbar-item">
       <a href="{{ url_for('logout') }}" class="button is-light">
-        <span class="mdi mdi-logout"></span>&nbsp; Logout
+        Logout
       </a>
     </div>
   </div>
   {% endif %}
 </nav>
 
-<!-- MAIN CONTENT -->
 <section class="section">
   <div class="container">
 
-    <!-- BACK BUTTON -->
-    {% if request.endpoint not in ['index', 'login'] %}
-    <a onclick="history.back()" class="button is-light back-btn">
-      <span class="mdi mdi-arrow-left"></span>&nbsp; Back
-    </a>
-    {% endif %}
-
-    <!-- FLASH MESSAGES -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for cat, msg in messages %}
-          <div class="notification is-{{ 'success' if cat=='success' else 'danger' }}">
+          <div class="notification is-{{ 'danger' if cat=='danger' else 'success' }}">
             {{ msg }}
           </div>
         {% endfor %}
@@ -106,7 +43,6 @@
     {% endwith %}
 
     {% block content %}{% endblock %}
-
   </div>
 </section>
 
