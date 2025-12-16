@@ -23,14 +23,14 @@
 
   .button.is-selected {
     background-color: #3273dc;
-    color: #fff;
+    color: #ffffff;
   }
 </style>
 
 <div class="card-box">
-  <h1 class="title is-4 has-text-centered">Leak Test</h1>
+  <h1 class="title is-4 has-text-centered">🛡 Leak Test</h1>
 
-  <form method="POST" enctype="multipart/form-data" id="leakForm">
+  <form method="POST" id="leakForm">
 
     <!-- LINE -->
     <div class="field">
@@ -65,26 +65,13 @@
       <div class="select is-fullwidth">
         <select name="grammage" id="grammage" required onchange="checkForm()">
           <option value="">Select grammage</option>
-          <option>10</option>
-          <option>15</option>
-          <option>25</option>
-          <option>26</option>
-          <option>48</option>
-          <option>50</option>
-          <option>75</option>
-          <option>85</option>
-          <option>89</option>
-          <option>100</option>
-          <option>120</option>
-          <option>125</option>
-          <option>150</option>
-          <option>235</option>
-          <option>250</option>
-          <option>300</option>
-          <option>320</option>
-          <option>400</option>
-          <option>450</option>
-          <option>600</option>
+          <option>10</option><option>15</option><option>25</option>
+          <option>26</option><option>48</option><option>50</option>
+          <option>75</option><option>85</option><option>89</option>
+          <option>100</option><option>120</option><option>125</option>
+          <option>150</option><option>235</option><option>250</option>
+          <option>300</option><option>320</option>
+          <option>400</option><option>450</option><option>600</option>
         </select>
       </div>
     </div>
@@ -95,12 +82,8 @@
       <div class="select is-fullwidth">
         <select name="pressure" id="pressure" required onchange="checkForm()">
           <option value="">Select pressure</option>
-          <option>150</option>
-          <option>200</option>
-          <option>250</option>
-          <option>300</option>
-          <option>350</option>
-          <option>400</option>
+          <option>150</option><option>200</option><option>250</option>
+          <option>300</option><option>350</option><option>400</option>
           <option>450</option>
         </select>
       </div>
@@ -118,13 +101,7 @@
       <input type="hidden" name="result" id="result" required>
     </div>
 
-    <!-- PHOTO (OPTIONAL) -->
-    <div class="field">
-      <label class="label">Photo (optional)</label>
-      <input class="input" type="file" name="photo" accept="image/*">
-    </div>
-
-    <!-- REMARKS (OPTIONAL) -->
+    <!-- REMARKS -->
     <div class="field">
       <label class="label">Remarks (optional)</label>
       <textarea class="textarea" name="remarks"
@@ -144,18 +121,17 @@
 function setBtnValue(field, value, btn){
   document.getElementById(field).value = value;
 
-  btn.parentElement.querySelectorAll('.button').forEach(b => {
-    b.classList.remove('is-selected');
-  });
-  btn.classList.add('is-selected');
+  btn.parentElement.querySelectorAll('.button')
+    .forEach(b => b.classList.remove('is-selected'));
 
+  btn.classList.add('is-selected');
   checkForm();
 }
 
 function checkForm(){
   const required = ['line','flavour','grammage','pressure','result'];
   const ok = required.every(id =>
-    document.getElementById(id).value
+    document.getElementById(id).value !== ""
   );
   document.getElementById('submitBtn').disabled = !ok;
 }
