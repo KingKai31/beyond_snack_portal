@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 
+<!-- Chart.js (REQUIRED) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
   .kpi-grid {
     display: grid;
@@ -42,25 +45,21 @@
 <!-- KPI CARDS -->
 <div class="kpi-grid">
   <div class="kpi-card">
-    <span class="mdi mdi-check-circle-outline mdi-24px"></span>
     <div class="kpi-value" id="kpiPass">-</div>
     <div>Leak Pass %</div>
   </div>
 
   <div class="kpi-card">
-    <span class="mdi mdi-gas-cylinder mdi-24px"></span>
     <div class="kpi-value" id="kpiOxy">-</div>
     <div>Avg Oxygen</div>
   </div>
 
   <div class="kpi-card">
-    <span class="mdi mdi-chart-bar mdi-24px"></span>
     <div class="kpi-value" id="kpiBreak">-</div>
     <div>Avg Breakage</div>
   </div>
 
   <div class="kpi-card">
-    <span class="mdi mdi-alert-circle-outline mdi-24px"></span>
     <div class="kpi-value" id="kpiStop">-</div>
     <div>Top Stop</div>
   </div>
@@ -68,7 +67,7 @@
 
 <!-- CHARTS -->
 <div class="chart-box">
-  <h3 class="subtitle">Leak Test — Pass / Fail</h3>
+  <h3 class="subtitle">Leak Test</h3>
   <canvas id="leakChart"></canvas>
 </div>
 
@@ -88,109 +87,43 @@
 </div>
 
 <script>
-let leakChart, oxyChart, breakChart, stopChart;
-
 function loadDashboard() {
-  fetch("/api/dashboard_data_v2", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({})
-  })
-  .then(res => res.json())
-  .then(data => {
+  fetch("/api/dashboard_data_v2", { method: "POST" })
+    .then(res => res.json())
+    .then(data => {
 
-    /* KPI VALUES */
-    document.getElementById("kpiPass").innerText =
-      data.kpi.pass_rate !== undefined ? data.kpi.pass_rate + "%" : "-";
+      data.kpi = data.kpi || {};
+      data.leak = data.leak || {};
+      data.oxygen = data.oxygen || {};
+      data.breakage = data.breakage || {};
+      data.stop = data.stop || {};
 
-    document.getElementById("kpiOxy").innerText =
-      data.kpi.avg_oxygen ?? "-";
+      document.getElementById("kpiPass").innerText = data.kpi.pass_rate ?? "-";
+      document.getElementById("kpiOxy").innerText = data.kpi.avg_oxygen ?? "-";
+      document.getElementById("kpiBreak").innerText = data.kpi.avg_breakage ?? "-";
+      document.getElementById("kpiStop").innerText = data.kpi.top_stop ?? "-";
 
-    document.getElementById("kpiBreak").innerText =
-      data.kpi.avg_breakage ?? "-";
+      new Chart(document.getElementById("leakChart"), {
+        type: "bar",
+        data: { labels: [], datasets: [] }
+      });
 
-    document.getElementById("kpiStop").innerText =
-      data.kpi.top_stop ?? "-";
+      new Chart(document.getElementById("oxyChart"), {
+        type: "line",
+        data: { labels: [], datasets: [] }
+      });
 
-    /* DESTROY OLD CHARTS */
-    if (leakChart) leakChart.destroy();
-    if (oxyChart) oxyChart.destroy();
-    if (breakChart) breakChart.destroy();
-    if (stopChart) stopChart.destroy();
+      new Chart(document.getElementById("breakChart"), {
+        type: "bar",
+        data: { labels: [], datasets: [] }
+      });
 
-    /* LEAK CHART */
-    leakChart = new Chart(document.getElementById("leakChart"), {
-      type: "bar",
-      data: {
-        labels: data.leak.date || [],
-        datasets: [
-          {
-            label: "Pass",
-            data: data.leak.pass || [],
-            backgroundColor: "#48c774"
-          },
-          {
-            label: "Fail",
-            data: data.leak.fail || [],
-            backgroundColor: "#f14668"
-          }
-        ]
-      },
-      options: { responsive: true }
-    });
-
-    /* OXYGEN CHART */
-    oxyChart = new Chart(document.getElementById("oxyChart"), {
-      type: "line",
-      data: {
-        labels: data.oxygen.date || [],
-        datasets: [{
-          label: "Oxygen %",
-          data: data.oxygen.oxygen || [],
-          borderColor: "#3273dc",
-          fill: false,
-          tension: 0.3
-        }]
-      },
-      options: { responsive: true }
-    });
-
-    /* BREAKAGE CHART */
-    breakChart = new Chart(document.getElementById("breakChart"), {
-      type: "bar",
-      data: {
-        labels: data.breakage.code || [],
-        datasets: [
-          { label: "Good %", data: data.breakage.good || [], backgroundColor: "#48c774" },
-          { label: "Broken %", data: data.breakage.broken || [], backgroundColor: "#f14668" },
-          { label: "Cluster %", data: data.breakage.cluster || [], backgroundColor: "#ffdd57" },
-          { label: "Residue %", data: data.breakage.residue || [], backgroundColor: "#7957d5" }
-        ]
-      },
-      options: { responsive: true }
-    });
-
-    /* STOP PIE */
-    stopChart = new Chart(document.getElementById("stopChart"), {
-      type: "pie",
-      data: {
-        labels: data.stop.label || [],
-        datasets: [{
-          data: data.stop.count || [],
-          backgroundColor: [
-            "#ff3860", "#ffdd57", "#48c774",
-            "#3273dc", "#7957d5", "#00d1b2"
-          ]
-        }]
-      },
-      options: { responsive: true }
-    });
-
-  })
-  .catch(err => {
-    alert("Dashboard failed to load");
-    console.error(err);
-  });
+      new Chart(document.getElementById("stopChart"), {
+        type: "pie",
+        data: { labels: [], datasets: [] }
+      });
+    })
+    .catch(() => alert("Dashboard data error"));
 }
 
 loadDashboard();
