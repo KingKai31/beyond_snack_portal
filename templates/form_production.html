@@ -32,7 +32,7 @@
 </style>
 
 <div class="card-box">
-  <h1 class="title is-4 has-text-centered">Production Log Entry</h1>
+  <h1 class="title is-4 has-text-centered">🕒 Production Log Entry</h1>
 
   <form method="POST" id="logForm">
 
@@ -64,7 +64,7 @@
     <div class="field hidden" id="stopReasonBox">
       <label class="label">Stop Reason *</label>
       <div class="select is-fullwidth">
-        <select name="stop_reason" id="stop_reason" onchange="handleOther()">
+        <select id="stop_reason_select" onchange="handleOther()">
           <option value="">Select reason</option>
           <option>Blade change</option>
           <option>Seasoning drum cleaning</option>
@@ -84,9 +84,12 @@
     <!-- OTHER REASON -->
     <div class="field hidden" id="otherBox">
       <label class="label">Specify Other *</label>
-      <input class="input" name="stop_other" id="stop_other"
+      <input class="input" id="stop_other"
         placeholder="Type stop reason">
     </div>
+
+    <!-- FINAL VALUE SENT TO BACKEND -->
+    <input type="hidden" name="stop_reason" id="final_stop_reason">
 
     <!-- SUBMIT -->
     <button class="button is-primary is-fullwidth mt-4"
@@ -100,9 +103,8 @@
 <script>
 function setValue(field, value, btn){
   document.getElementById(field).value = value;
-  btn.parentElement.querySelectorAll('.button').forEach(b=>{
-    b.classList.remove('is-selected');
-  });
+  btn.parentElement.querySelectorAll('.button')
+    .forEach(b => b.classList.remove('is-selected'));
   btn.classList.add('is-selected');
   validate();
 }
@@ -110,9 +112,8 @@ function setValue(field, value, btn){
 function setAction(value, btn){
   document.getElementById('action').value = value;
 
-  btn.parentElement.querySelectorAll('.button').forEach(b=>{
-    b.classList.remove('is-selected');
-  });
+  btn.parentElement.querySelectorAll('.button')
+    .forEach(b => b.classList.remove('is-selected'));
   btn.classList.add('is-selected');
 
   const stopBox = document.getElementById('stopReasonBox');
@@ -123,15 +124,16 @@ function setAction(value, btn){
   } else {
     stopBox.classList.add('hidden');
     otherBox.classList.add('hidden');
-    document.getElementById('stop_reason').value = '';
+    document.getElementById('stop_reason_select').value = '';
     document.getElementById('stop_other').value = '';
+    document.getElementById('final_stop_reason').value = '';
   }
 
   validate();
 }
 
 function handleOther(){
-  const reason = document.getElementById('stop_reason').value;
+  const reason = document.getElementById('stop_reason_select').value;
   const otherBox = document.getElementById('otherBox');
 
   if(reason === 'Other'){
@@ -140,6 +142,7 @@ function handleOther(){
     otherBox.classList.add('hidden');
     document.getElementById('stop_other').value = '';
   }
+
   validate();
 }
 
@@ -149,10 +152,15 @@ function validate(){
   let valid = line && action;
 
   if(action === 'Stop'){
-    const reason = document.getElementById('stop_reason').value;
-    valid = valid && reason;
-    if(reason === 'Other'){
-      valid = valid && document.getElementById('stop_other').value;
+    const r = document.getElementById('stop_reason_select').value;
+    if(!r) valid = false;
+
+    if(r === 'Other'){
+      const other = document.getElementById('stop_other').value;
+      if(!other) valid = false;
+      document.getElementById('final_stop_reason').value = other;
+    } else {
+      document.getElementById('final_stop_reason').value = r;
     }
   }
 
