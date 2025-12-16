@@ -3,11 +3,11 @@
 
 <style>
   .menu-grid {
+    max-width: 520px;
+    margin: auto;
     display: flex;
     flex-direction: column;
     gap: 14px;
-    max-width: 520px;
-    margin: auto;
   }
 
   .menu-card {
@@ -18,10 +18,10 @@
     background: #ffffff;
     border-radius: 14px;
     box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+    text-decoration: none;
+    color: #363636;
     font-size: 1.1rem;
     font-weight: 500;
-    color: #363636;
-    text-decoration: none;
   }
 
   .menu-card:hover {
@@ -31,10 +31,6 @@
   .menu-icon {
     font-size: 26px;
     color: #3273dc;
-  }
-
-  .menu-text {
-    flex-grow: 1;
   }
 
   .boss {
@@ -53,33 +49,33 @@
 
   <a href="{{ url_for('leak_page') }}" class="menu-card">
     <span class="mdi mdi-shield-check menu-icon"></span>
-    <span class="menu-text">Leak Test</span>
+    Leak Test
   </a>
 
   <a href="{{ url_for('oxygen_page') }}" class="menu-card">
     <span class="mdi mdi-gas-cylinder menu-icon"></span>
-    <span class="menu-text">Oxygen Test</span>
+    Oxygen Test
   </a>
 
   <a href="{{ url_for('breakage_page') }}" class="menu-card">
     <span class="mdi mdi-chart-bar menu-icon"></span>
-    <span class="menu-text">Breakage Analysis</span>
+    Breakage Analysis
   </a>
 
   <a href="{{ url_for('log_page') }}" class="menu-card">
     <span class="mdi mdi-clock-outline menu-icon"></span>
-    <span class="menu-text">Production Log</span>
+    Production Log
   </a>
 
   {% if session.get("role") == "manager" %}
   <a href="{{ url_for('dashboard') }}" class="menu-card boss">
     <span class="mdi mdi-view-dashboard menu-icon"></span>
-    <span class="menu-text">Dashboard</span>
+    Dashboard
   </a>
 
   <a href="{{ url_for('reports') }}" class="menu-card boss">
     <span class="mdi mdi-download menu-icon"></span>
-    <span class="menu-text">Reports</span>
+    Reports
   </a>
   {% endif %}
 
