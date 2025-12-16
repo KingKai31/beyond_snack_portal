@@ -1,22 +1,50 @@
-{% extends "base.html" %}
-{% block content %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Beyond Snack Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<h1 class="title has-text-centered">Reports & Downloads</h1>
+  <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font/css/materialdesignicons.min.css" rel="stylesheet">
+</head>
 
-<a href="{{ url_for('export_leak') }}" class="button is-link is-fullwidth mb-3">
-  Download Leak Test
-</a>
+<body>
 
-<a href="{{ url_for('export_oxygen') }}" class="button is-link is-fullwidth mb-3">
-  Download Oxygen Test
-</a>
+<nav class="navbar is-white has-shadow">
+  <div class="navbar-brand">
+    <div class="navbar-item">
+      <strong>Beyond Snack Portal</strong>
+    </div>
+  </div>
 
-<a href="{{ url_for('export_breakage') }}" class="button is-link is-fullwidth mb-3">
-  Download Breakage Report
-</a>
+  {% if session.get("user") %}
+  <div class="navbar-end">
+    <div class="navbar-item">
+      <a href="{{ url_for('logout') }}" class="button is-light">
+        Logout
+      </a>
+    </div>
+  </div>
+  {% endif %}
+</nav>
 
-<a href="{{ url_for('export_log') }}" class="button is-link is-fullwidth mb-3">
-  Download Production Log
-</a>
+<section class="section">
+  <div class="container">
 
-{% endblock %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat, msg in messages %}
+          <div class="notification is-{{ 'danger' if cat=='danger' else 'success' }}">
+            {{ msg }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </div>
+</section>
+
+</body>
+</html>
