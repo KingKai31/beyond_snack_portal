@@ -18,9 +18,19 @@
     background: white;
     border-radius: 14px;
     box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-    text-decoration: none;
-    color: #363636;
     font-weight: 500;
+  }
+
+  .report-card button {
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .report-card:hover {
@@ -32,25 +42,41 @@
 
 <div class="reports">
 
-  <a href="{{ url_for('export_leak') }}" class="report-card">
-    Leak Test Report
-    <span class="mdi mdi-download"></span>
-  </a>
+  <form method="GET" action="{{ url_for('export_leak') }}">
+    <div class="report-card">
+      <button type="submit">
+        Leak Test Report
+        <span class="mdi mdi-download"></span>
+      </button>
+    </div>
+  </form>
 
-  <a href="{{ url_for('export_oxygen') }}" class="report-card">
-    Oxygen Test Report
-    <span class="mdi mdi-download"></span>
-  </a>
+  <form method="GET" action="{{ url_for('export_oxygen') }}">
+    <div class="report-card">
+      <button type="submit">
+        Oxygen Test Report
+        <span class="mdi mdi-download"></span>
+      </button>
+    </div>
+  </form>
 
-  <a href="{{ url_for('export_breakage') }}" class="report-card">
-    Breakage Report
-    <span class="mdi mdi-download"></span>
-  </a>
+  <form method="GET" action="{{ url_for('export_breakage') }}">
+    <div class="report-card">
+      <button type="submit">
+        Breakage Report
+        <span class="mdi mdi-download"></span>
+      </button>
+    </div>
+  </form>
 
-  <a href="{{ url_for('export_log') }}" class="report-card">
-    Production Log Report
-    <span class="mdi mdi-download"></span>
-  </a>
+  <form method="GET" action="{{ url_for('export_log') }}">
+    <div class="report-card">
+      <button type="submit">
+        Production Log Report
+        <span class="mdi mdi-download"></span>
+      </button>
+    </div>
+  </form>
 
 </div>
 
