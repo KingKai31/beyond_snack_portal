@@ -1,32 +1,88 @@
 {% extends "base.html" %}
 {% block content %}
 
+<style>
+  .menu-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 520px;
+    margin: auto;
+  }
+
+  .menu-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px;
+    background: #ffffff;
+    border-radius: 14px;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #363636;
+    text-decoration: none;
+  }
+
+  .menu-card:hover {
+    background: #f0f4ff;
+  }
+
+  .menu-icon {
+    font-size: 26px;
+    color: #3273dc;
+  }
+
+  .menu-text {
+    flex-grow: 1;
+  }
+
+  .boss {
+    background: linear-gradient(135deg, #ff3860, #ff7a7a);
+    color: white;
+  }
+
+  .boss .menu-icon {
+    color: white;
+  }
+</style>
+
 <h1 class="title has-text-centered">Main Menu</h1>
 
-<a href="{{ url_for('leak_page') }}" class="button is-link is-fullwidth mb-3">
-  Leak Test
-</a>
+<div class="menu-grid">
 
-<a href="{{ url_for('oxygen_page') }}" class="button is-link is-fullwidth mb-3">
-  Oxygen Test
-</a>
+  <a href="{{ url_for('leak_page') }}" class="menu-card">
+    <span class="mdi mdi-shield-check menu-icon"></span>
+    <span class="menu-text">Leak Test</span>
+  </a>
 
-<a href="{{ url_for('breakage_page') }}" class="button is-link is-fullwidth mb-3">
-  Breakage Analysis
-</a>
+  <a href="{{ url_for('oxygen_page') }}" class="menu-card">
+    <span class="mdi mdi-gas-cylinder menu-icon"></span>
+    <span class="menu-text">Oxygen Test</span>
+  </a>
 
-<a href="{{ url_for('log_page') }}" class="button is-link is-fullwidth mb-3">
-  Production Log
-</a>
+  <a href="{{ url_for('breakage_page') }}" class="menu-card">
+    <span class="mdi mdi-chart-bar menu-icon"></span>
+    <span class="menu-text">Breakage Analysis</span>
+  </a>
 
-{% if session.get("role") == "manager" %}
-<a href="{{ url_for('dashboard') }}" class="button is-danger is-fullwidth mb-3">
-  Dashboard
-</a>
+  <a href="{{ url_for('log_page') }}" class="menu-card">
+    <span class="mdi mdi-clock-outline menu-icon"></span>
+    <span class="menu-text">Production Log</span>
+  </a>
 
-<a href="{{ url_for('reports') }}" class="button is-warning is-fullwidth mb-3">
-  Reports
-</a>
-{% endif %}
+  {% if session.get("role") == "manager" %}
+  <a href="{{ url_for('dashboard') }}" class="menu-card boss">
+    <span class="mdi mdi-view-dashboard menu-icon"></span>
+    <span class="menu-text">Dashboard</span>
+  </a>
+
+  <a href="{{ url_for('reports') }}" class="menu-card boss">
+    <span class="mdi mdi-download menu-icon"></span>
+    <span class="menu-text">Reports</span>
+  </a>
+  {% endif %}
+
+</div>
 
 {% endblock %}
