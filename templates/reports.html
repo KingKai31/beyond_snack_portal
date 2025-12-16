@@ -2,7 +2,7 @@
 {% block content %}
 
 <style>
-  .reports-container {
+  .reports {
     max-width: 520px;
     margin: auto;
     display: flex;
@@ -13,69 +13,43 @@
   .report-card {
     display: flex;
     align-items: center;
-    gap: 16px;
+    justify-content: space-between;
     padding: 18px;
-    background: #ffffff;
+    background: white;
     border-radius: 14px;
-    box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
     text-decoration: none;
     color: #363636;
-    font-size: 1.05rem;
     font-weight: 500;
   }
 
   .report-card:hover {
     background: #f0f4ff;
   }
-
-  .report-icon {
-    font-size: 26px;
-    color: #3273dc;
-  }
-
-  .report-text {
-    flex-grow: 1;
-  }
-
-  .report-arrow {
-    font-size: 20px;
-    color: #999;
-  }
 </style>
 
-<h1 class="title has-text-centered">📥 Reports & Downloads</h1>
-<p class="has-text-centered mb-4" style="color:#666;">
-  Download Excel reports
-</p>
+<h1 class="title has-text-centered">Reports</h1>
 
-<div class="reports-container">
+<div class="reports">
 
-  <!-- LEAK TEST -->
   <a href="{{ url_for('export_leak') }}" class="report-card">
-    <span class="mdi mdi-shield-check report-icon"></span>
-    <span class="report-text">Leak Test Report</span>
-    <span class="mdi mdi-download report-arrow"></span>
+    Leak Test Report
+    <span class="mdi mdi-download"></span>
   </a>
 
-  <!-- OXYGEN TEST -->
   <a href="{{ url_for('export_oxygen') }}" class="report-card">
-    <span class="mdi mdi-gas-cylinder report-icon"></span>
-    <span class="report-text">Oxygen Test Report</span>
-    <span class="mdi mdi-download report-arrow"></span>
+    Oxygen Test Report
+    <span class="mdi mdi-download"></span>
   </a>
 
-  <!-- BREAKAGE -->
   <a href="{{ url_for('export_breakage') }}" class="report-card">
-    <span class="mdi mdi-chart-bar report-icon"></span>
-    <span class="report-text">Breakage Analysis Report</span>
-    <span class="mdi mdi-download report-arrow"></span>
+    Breakage Report
+    <span class="mdi mdi-download"></span>
   </a>
 
-  <!-- PRODUCTION LOG -->
   <a href="{{ url_for('export_log') }}" class="report-card">
-    <span class="mdi mdi-clock-outline report-icon"></span>
-    <span class="report-text">Production Log Report</span>
-    <span class="mdi mdi-download report-arrow"></span>
+    Production Log Report
+    <span class="mdi mdi-download"></span>
   </a>
 
 </div>
