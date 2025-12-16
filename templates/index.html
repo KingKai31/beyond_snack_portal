@@ -47,36 +47,44 @@
 
 <div class="menu-grid">
 
+  <!-- LEAK TEST -->
   <a href="{{ url_for('leak_page') }}" class="menu-card">
     <span class="mdi mdi-shield-check menu-icon"></span>
     Leak Test
   </a>
 
+  <!-- OXYGEN TEST -->
   <a href="{{ url_for('oxygen_page') }}" class="menu-card">
     <span class="mdi mdi-gas-cylinder menu-icon"></span>
     Oxygen Test
   </a>
 
+  <!-- BREAKAGE -->
   <a href="{{ url_for('breakage_page') }}" class="menu-card">
     <span class="mdi mdi-chart-bar menu-icon"></span>
     Breakage Analysis
   </a>
 
+  <!-- PRODUCTION LOG -->
   <a href="{{ url_for('log_page') }}" class="menu-card">
     <span class="mdi mdi-clock-outline menu-icon"></span>
     Production Log
   </a>
 
   {% if session.get("role") == "manager" %}
+
+  <!-- DASHBOARD -->
   <a href="{{ url_for('dashboard') }}" class="menu-card boss">
     <span class="mdi mdi-view-dashboard menu-icon"></span>
     Dashboard
   </a>
 
+  <!-- REPORTS -->
   <a href="{{ url_for('reports') }}" class="menu-card boss">
     <span class="mdi mdi-download menu-icon"></span>
     Reports
   </a>
+
   {% endif %}
 
 </div>
